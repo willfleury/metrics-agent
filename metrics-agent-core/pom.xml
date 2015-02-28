@@ -5,10 +5,10 @@
         <groupId>com.fleury</groupId>
         <artifactId>metrics-agent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-    </parent>
-    <artifactId>metrics-agent-core</artifactId>
+	</parent>
+	<artifactId>metrics-agent-core</artifactId>
 	<name>metrics-agent-core</name>
-    <packaging>jar</packaging>
+	<packaging>jar</packaging>
 	
 	<dependencies>
 		<dependency>
