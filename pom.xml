@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.fleury</groupId>
+    <artifactId>metrics-agent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+		
+		<dropwizard.metrics>3.1.0</dropwizard.metrics>
+		<asm.version>5.0.3</asm.version>
+		<slf4j.version>1.7.7</slf4j.version>
+		<prometheus.version>0.0.6</prometheus.version>
+		<jackson.version>2.4.0</jackson.version>
+		
+		<log4j.version>1.7.10</log4j.version>
+		<junit.version>4.11</junit.version>
+    </properties>
+	
+	
+	<modules>
+		<module>metrics-agent-core</module>
+		<module>metrics-agent-annotation</module>
+		<module>metrics-agent-codahale</module>
+		<module>metrics-agent-prometheus</module>
+		<module>metrics-agent-dist</module>
+	</modules>
+	
+	<dependencies>		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

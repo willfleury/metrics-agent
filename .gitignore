@@ -1,0 +1,7 @@
+.classpath
+.project
+.settings/
+.DS_Store
+nbactions.xml
+target/
+dependency-reduced-pom.xml
