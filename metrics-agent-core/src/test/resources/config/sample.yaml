@@ -1,0 +1,20 @@
+
+# key is class name, method name and method signature
+# {class}:{method}{signature}
+
+# labels are of the format
+# {name}:{value}
+# {value} can be a constant or it can be templated based on the method stack of 
+# variables/fields accessible via objects on the stack
+
+metrics:
+  com.fleury.sample.Engine.sampleMethod(I)J:
+    - type: Counted
+      name: count
+      doc: trying to count
+      labels: ['name1:value1', 'name2:value2']
+    - type: Timed
+      name: timer
+      doc: trying to time
+      labels: ['name1:value1', 'name2:value2']
+       
