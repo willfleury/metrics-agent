@@ -146,22 +146,22 @@ Annotations are provided for all metric types
 	metrics:
 	  com.fleury.sample.Engine.sampleMethod(I)J:
 	    - type: Counted
-		  name: count
-		  doc: trying to count
-		  labels: ['name1:value1', 'name2:value2']
+		  name: {name}
+		  doc: {metric documentation}
+		  labels: ['{name:value}', '{name:value}']
 	    - type: Gauged
-		  name: gauged
-		  mode: inc
-		  doc: trying to gauge
-		  labels: ['name1:value1', 'name2:value2']
+		  name: {name}
+		  mode: {mode}
+		  doc: {metric documentation}
+		  labels: ['{name:value}']
 	    - type: ExceptionCounted
-		  name: timer
-		  doc: trying to time
-		  labels: ['methodArg1:$1', 'methodArg2:$2']
+		  name: {name}
+		  doc: {metric documentation}
+		  labels: ['{name:value}']
 	    - type: Timed
-		  name: timer
-		  doc: trying to time
-		  labels: ['methodArg1:$1', 'methodArg2:$2']
+		  name: {name}
+		  doc: {metric documentation}
+		  labels: ['{name:value}']
 
 ## Supported Metrics Systems
 
@@ -205,7 +205,8 @@ if you manually instrumented.
 Very lightweight.
 	
 	asm
-	slf-4j
+	jackson
+	slf4j
 	log4j
 
 The client libraries for whatever metric provider you choose are also included. 
@@ -225,7 +226,7 @@ The module metrics-agent-dist has build profiles for both Prometheus and Codahal
 
 The agent must be attached to the JVM at startup. It cannot be attached to a running JVM.
 
-	-javaagent:metric-agent-dis.jar
+	-javaagent:metric-agent-dist.jar
 
 Example
 	
