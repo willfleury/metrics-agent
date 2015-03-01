@@ -2,7 +2,7 @@ package com.fleury.metrics.agent.transformer.asm.injectors;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public interface Injector {	
 	public void injectAtMethodEnter();

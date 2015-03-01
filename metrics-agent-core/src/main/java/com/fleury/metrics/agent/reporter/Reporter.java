@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class Reporter {
 
@@ -18,7 +18,7 @@ public class Reporter {
 	public static final MetricSystem METRIC_SYSTEM = MetricSystemProviderFactory.INSTANCE.getProvider().createMetricSystem();
 	
 	public static void registerMetrics(Collection<Metric> metrics) {
-		for (Metric metric : metrics) {
+		for (Metric metric : metrics) {			
 			switch (metric.getType()) {
 				case Counted: 
 				case ExceptionCounted:

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public abstract class BaseMetricTest {
 	

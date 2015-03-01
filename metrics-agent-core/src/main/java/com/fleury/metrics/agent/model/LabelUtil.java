@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class LabelUtil {
 	
@@ -37,9 +37,26 @@ public class LabelUtil {
 	
 	public static int getLabelValueVarIndex(String labelValue) {
 		if (!labelValue.matches("\\$[0-9]+")) {
-			throw new IllegalArgumentException("Templated label variable must match pattern $[0-9]+");
+			throw new IllegalArgumentException("Templated label variable: " 
+					+ labelValue + " must match pattern $[0-9]+");
 		}
 		
 		return Integer.valueOf(labelValue.substring(1, labelValue.length()));
+	}
+	
+	public static void validateLabelValues(String method, List<String> labels, int numParams) {
+		List<String> values = getLabelValues(labels);
+		
+		for (String value : values) {
+			if (value.startsWith("$")) {
+				int index = getLabelValueVarIndex(value);
+				
+				if (index > numParams) { //method params start at 1
+					throw new IllegalStateException(
+							String.format("Var index: %d for method %s invalid. "
+									+ "It has only %d params", index, method, numParams));
+				}
+			}
+		}
 	}
 }

@@ -8,7 +8,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class CounterInjector extends AbstractInjector {
 	

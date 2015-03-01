@@ -8,7 +8,7 @@ import org.objectweb.asm.Type;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public enum MetricType {
 	Counted(Counted.class),

@@ -7,7 +7,7 @@ import org.objectweb.asm.AnnotationVisitor;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 /**
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class MetricAnnotationAttributeVisitor extends AnnotationVisitor {
 

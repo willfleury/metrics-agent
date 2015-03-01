@@ -22,7 +22,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public abstract class AbstractInjector implements Injector {
 	
@@ -33,14 +33,12 @@ public abstract class AbstractInjector implements Injector {
 	protected final Type[] argTypes;
 	protected final Metric metric;
 	
-	
 	public AbstractInjector(Metric metric, AdviceAdapter aa, MethodVisitor mv, Type[] argTypes) {
 		this.metric = metric;
 		this.aa = aa;
 		this.mv = mv;
 		this.argTypes = argTypes;
 	}
-	
 	
 	@Override
 	public void injectAtMethodEnter() {}
@@ -50,7 +48,6 @@ public abstract class AbstractInjector implements Injector {
 	
 	@Override
 	public void injectAtMethodExit(int opcode) { }
-	
 	
 	protected void injectNameAndLabelToStack() {
 		int nameVar = aa.newLocal(Type.getType(String.class));

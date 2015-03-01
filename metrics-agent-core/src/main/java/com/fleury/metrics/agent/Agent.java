@@ -7,7 +7,7 @@ import java.lang.instrument.Instrumentation;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class Agent {
 
