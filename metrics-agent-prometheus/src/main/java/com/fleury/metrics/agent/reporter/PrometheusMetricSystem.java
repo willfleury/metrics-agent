@@ -1,5 +1,6 @@
 package com.fleury.metrics.agent.reporter;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Summary;
@@ -9,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class PrometheusMetricSystem implements MetricSystem {
 	
@@ -106,4 +107,10 @@ public class PrometheusMetricSystem implements MetricSystem {
 		}
 	}
 
+	void reset() {
+		COUNTERS.clear();
+		GAUGES.clear();
+		SUMMARIES.clear();
+		CollectorRegistry.defaultRegistry.clear();
+	}
 }

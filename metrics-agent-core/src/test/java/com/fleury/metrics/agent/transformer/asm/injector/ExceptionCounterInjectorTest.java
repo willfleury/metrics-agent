@@ -9,7 +9,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class ExceptionCounterInjectorTest extends BaseMetricTest {
 	

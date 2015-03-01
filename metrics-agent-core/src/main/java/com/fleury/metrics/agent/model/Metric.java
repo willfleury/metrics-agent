@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public  class Metric {
 	

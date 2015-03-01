@@ -9,7 +9,7 @@ import static org.objectweb.asm.Opcodes.ICONST_5;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class OpCodeUtil {
 	public static int getIConstOpcodeForInteger(int val) {

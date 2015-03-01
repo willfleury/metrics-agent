@@ -11,7 +11,7 @@ import org.objectweb.asm.ClassWriter;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
 	

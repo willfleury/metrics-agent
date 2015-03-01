@@ -6,7 +6,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class LabelsTest extends BaseMetricTest {
 	
@@ -34,6 +34,18 @@ public class LabelsTest extends BaseMetricTest {
 	@Test
 	public void shouldCountConstructorInvocationWithDynamicLongValue() throws Exception {
 		testInvocationWithArgs(CountedConstructorWithDynamicLongLabelValueClass.class, 
+				new Object[] {5}, new String[] {"5"});
+	}
+	
+	@Test (expected = IllegalStateException.class)
+	public void shouldThrowExceptionWhenInvalidParamIndexLabelValue() throws Exception {
+		testInvocationWithArgs(CountedConstructorWithInvalidParamIndexLabelValueClass.class, 
+				new Object[] {5}, new String[] {"5"});
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void shouldThrowExceptionWhenInvalidDynamicLabelValue() throws Exception {
+		testInvocationWithArgs(CountedConstructorWithInvalidDynamicLabelValueClass.class, 
 				new Object[] {5}, new String[] {"5"});
 	}
 	
@@ -90,6 +102,22 @@ public class LabelsTest extends BaseMetricTest {
 		
 		@Counted(name = "constructor", labels = {"name1:$1"})
 		public CountedConstructorWithDynamicLongLabelValueClass(long value) {
+			BaseMetricTest.performBasicTask();
+		}
+	}
+	
+	public static class CountedConstructorWithInvalidParamIndexLabelValueClass {
+		
+		@Counted(name = "constructor", labels = {"name1:$5"})
+		public CountedConstructorWithInvalidParamIndexLabelValueClass(long value) {
+			BaseMetricTest.performBasicTask();
+		}
+	}
+	
+	public static class CountedConstructorWithInvalidDynamicLabelValueClass {
+		
+		@Counted(name = "constructor", labels = {"name1:$badlabel"})
+		public CountedConstructorWithInvalidDynamicLabelValueClass(long value) {
 			BaseMetricTest.performBasicTask();
 		}
 	}

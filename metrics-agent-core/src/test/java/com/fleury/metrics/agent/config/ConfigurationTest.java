@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class ConfigurationTest {
 	

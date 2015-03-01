@@ -10,7 +10,7 @@ import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class MetricClassVisitor extends ClassVisitor {
 	

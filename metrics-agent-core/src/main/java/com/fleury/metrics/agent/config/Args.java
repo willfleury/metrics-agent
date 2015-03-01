@@ -2,7 +2,7 @@ package com.fleury.metrics.agent.config;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class Args {
 

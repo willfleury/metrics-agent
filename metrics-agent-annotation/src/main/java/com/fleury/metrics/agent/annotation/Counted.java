@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)

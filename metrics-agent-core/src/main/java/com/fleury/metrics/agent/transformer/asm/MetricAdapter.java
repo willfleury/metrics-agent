@@ -1,6 +1,7 @@
 package com.fleury.metrics.agent.transformer.asm;
 
 import com.fleury.metrics.agent.model.AnnotationScanner;
+import com.fleury.metrics.agent.model.LabelUtil;
 import com.fleury.metrics.agent.model.Metric;
 import com.fleury.metrics.agent.model.MetricType;
 import com.fleury.metrics.agent.reporter.Reporter;
@@ -16,7 +17,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
 public class MetricAdapter extends AdviceAdapter {
 	
@@ -24,10 +25,12 @@ public class MetricAdapter extends AdviceAdapter {
 	private final List<Injector> injectors = new ArrayList<Injector>();
 	private final AnnotationScanner annotationScanner;
 	private final Type[] argTypes;
+	private final String methodName;
 
 	public MetricAdapter(List<Metric> configMetrics, MethodVisitor mv, int access, String name, String desc) {
 		super (ASM5, mv, access, name, desc);
 		
+		this.methodName = name;
 		this.argTypes = Type.getArgumentTypes(desc);
 		this.annotationScanner = new AnnotationScanner(metrics);
 		
@@ -55,6 +58,7 @@ public class MetricAdapter extends AdviceAdapter {
 	
 	@Override
 	protected void onMethodEnter() { 
+		validateLabels();
 		Reporter.registerMetrics(metrics.values());
 		
 		for (Injector injector : injectors) {
@@ -75,6 +79,12 @@ public class MetricAdapter extends AdviceAdapter {
 	protected void onMethodExit(int opcode) {
 		for (Injector injector : injectors) {
 			injector.injectAtMethodExit(opcode);
+		}
+	}
+	
+	private void validateLabels() {
+		for (Metric metric : metrics.values()) {
+			LabelUtil.validateLabelValues(methodName, metric.getLabels(), argTypes.length);
 		}
 	}
 }
