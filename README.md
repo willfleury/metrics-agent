@@ -117,13 +117,20 @@ we don't allow use of variables created within the method as that is a very frag
 
 The String representation as given by String.valueOf() of the parameter is used as the label value. 
 That means for primitive types we perform boxing first and null objects will result in the 
-String "null".
+String "null". Note the first variable on the stack is always the reference to "this" which means
+method parameters start at index 1. 
+
+	@Counted (name = "service_total" labels = { "client:$1" }
+	public void callService(String client) 
+
+Each time this method is invoked it will use the value of the "client" parameter as the
+metric label value. 
 
 Note that we plan on supporting the ability to navigate object types to get child values
 like follows ($1.httpMethod) where $1 is the first method parameter and is e.g. of type HttpRequest. This
 means you are essentially doing HttpRequest.getHttpMethod().toString();
 
-We will also allow access to class field values as given using $fieldname synatx.
+We will also allow access to class field values as given using $fieldname syntax.
 
 
 ## Instrumentation Metadata 
@@ -139,12 +146,20 @@ doesn't require you to actually change your code whereas the former does.
 	@ExceptionCounted (name = "", labels = { } doc = "")
 
 
-Annotations are provided for all metric types 
+Annotations are provided for all metric types and can be added to methods including
+constructors. 
+
+	@Counted(name = "taskx_total" doc = "total invocations of task x")
+	@Timed (name = "taskx_time" doc = "duration of task x")
+	public Result performSomeTask() {
+		...
+	}
+
 
 ### Configuration
 
 	metrics:
-	  com.fleury.sample.Engine.sampleMethod(I)J:
+	  {class name}.{method name}{method signature}:
 	    - type: Counted
 		  name: {name}
 		  doc: {metric documentation}
@@ -162,6 +177,41 @@ Annotations are provided for all metric types
 		  name: {name}
 		  doc: {metric documentation}
 		  labels: ['{name:value}']
+
+Each metric is defined on a per method basis. A method is uniquely identified by the 
+combination of {class name}.{method name}{method signature}. As an example, if we 
+wanted to instrument the following method via configuration instead of annotations
+
+	package com.fleury.test;
+	....
+
+	public class TestClass {
+		....
+		
+		@Counted(name = "taskx_total" doc = "total invocations of task x")
+		public Result performSomeTask() {
+			...
+		}
+	}
+
+
+We write the configuration as follows
+
+	metrics:
+	  com.fleury.test.TestClass.performSomeTask()V:
+	    - type: Counted
+		  name: taskx_total
+		  doc: total invocations of task x
+
+
+Note the method signature is based on the method parameter types and return type. The
+parameter types are between the brackets () with the return type after. In this case
+we have no parameters and the return type is void (V). Here is a good overview of Java
+method signature mappings (TODO: link to correct JVM spec section)
+
+http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html
+
+
 
 ## Supported Metrics Systems
 
