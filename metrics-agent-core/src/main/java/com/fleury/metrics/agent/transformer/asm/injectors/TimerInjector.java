@@ -16,50 +16,48 @@ import org.objectweb.asm.commons.AdviceAdapter;
  * @author Will Fleury
  */
 public class TimerInjector extends AbstractInjector {
-	
-	private static final String METHOD = "recordTime";
-	private static final String SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;J)V";
-	
-	
-	private int startTimeVar;
-	private Label startFinally;
-	
-	public TimerInjector(Metric metric, AdviceAdapter aa, MethodVisitor mv, Type[] argTypes) {
-		super(metric, aa, mv, argTypes);
-	}
-	
-	@Override
-	public void injectAtMethodEnter() {
-		startFinally = new Label();
-		startTimeVar = aa.newLocal(Type.LONG_TYPE);
-		mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false);
-		mv.visitVarInsn(LSTORE, startTimeVar);
-		mv.visitLabel(startFinally);
-	}
-	
 
-	@Override
-	public void injectAtVisitMaxs(int maxStack, int maxLocals) {
-		Label endFinally = new Label();
-		mv.visitTryCatchBlock(startFinally, endFinally, endFinally, null);
-		mv.visitLabel(endFinally);
-		onFinally(ATHROW);
-		mv.visitInsn(ATHROW);
-	}
-	
-	@Override
-	public void injectAtMethodExit(int opcode) {
-		if (opcode != ATHROW) {
-			onFinally(opcode);
-		} 
-	}
-	
-	private void onFinally(int opcode) {
-		injectNameAndLabelToStack();
-		
-		mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false);
-		mv.visitVarInsn(LLOAD, startTimeVar);
-		mv.visitInsn(LSUB);
-		mv.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, METHOD, SIGNATURE, false);
-	}
+    private static final String METHOD = "recordTime";
+    private static final String SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;J)V";
+
+    private int startTimeVar;
+    private Label startFinally;
+
+    public TimerInjector(Metric metric, AdviceAdapter aa, MethodVisitor mv, Type[] argTypes) {
+        super(metric, aa, mv, argTypes);
+    }
+
+    @Override
+    public void injectAtMethodEnter() {
+        startFinally = new Label();
+        startTimeVar = aa.newLocal(Type.LONG_TYPE);
+        mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false);
+        mv.visitVarInsn(LSTORE, startTimeVar);
+        mv.visitLabel(startFinally);
+    }
+
+    @Override
+    public void injectAtVisitMaxs(int maxStack, int maxLocals) {
+        Label endFinally = new Label();
+        mv.visitTryCatchBlock(startFinally, endFinally, endFinally, null);
+        mv.visitLabel(endFinally);
+        onFinally(ATHROW);
+        mv.visitInsn(ATHROW);
+    }
+
+    @Override
+    public void injectAtMethodExit(int opcode) {
+        if (opcode != ATHROW) {
+            onFinally(opcode);
+        }
+    }
+
+    private void onFinally(int opcode) {
+        injectNameAndLabelToStack();
+
+        mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false);
+        mv.visitVarInsn(LLOAD, startTimeVar);
+        mv.visitInsn(LSUB);
+        mv.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, METHOD, SIGNATURE, false);
+    }
 }

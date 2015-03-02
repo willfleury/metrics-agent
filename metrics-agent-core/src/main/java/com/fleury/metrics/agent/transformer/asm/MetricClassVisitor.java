@@ -13,32 +13,32 @@ import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
  * @author Will Fleury
  */
 public class MetricClassVisitor extends ClassVisitor {
-	
-	private boolean isInterface;
-	private String className;
-	private final Configuration config;
 
-	public MetricClassVisitor(Configuration config, ClassVisitor cv) {
-		super(Opcodes.ASM5, cv);
-		this.config = config;
-	}
-	
-	@Override
-	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-		cv.visit(version, access, name, signature, superName, interfaces);
-		this.className = name;
-		this.isInterface = (access & ACC_INTERFACE) != 0;
-	}
-	
-	@Override
-	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
+    private boolean isInterface;
+    private String className;
+    private final Configuration config;
 
-		if (!isInterface && mv != null) { 
-			List<Metric> metadata = config.findMetrics(className, name + desc);
-			mv = new MetricAdapter(metadata, mv, access, name, desc);
-		}
+    public MetricClassVisitor(Configuration config, ClassVisitor cv) {
+        super(Opcodes.ASM5, cv);
+        this.config = config;
+    }
 
-		return mv;
-	}
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        cv.visit(version, access, name, signature, superName, interfaces);
+        this.className = name;
+        this.isInterface = (access & ACC_INTERFACE) != 0;
+    }
+
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
+
+        if (!isInterface && mv != null) {
+            List<Metric> metadata = config.findMetrics(className, name + desc);
+            mv = new MetricAdapter(metadata, mv, access, name, desc);
+        }
+
+        return mv;
+    }
 }

@@ -14,14 +14,17 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface Gauged {
-	
-	public static enum mode { inc, dec }
 
-	public String name();
-	
-	public mode mode();
-	
-	public String[] labels() default {};
-	
-	public String doc() default "";
+    public static enum mode {
+
+        inc, dec
+    }
+
+    String name();
+
+    mode mode();
+
+    String[] labels() default {};
+
+    String doc() default "";
 }

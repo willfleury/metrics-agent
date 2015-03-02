@@ -234,6 +234,11 @@ This is where we would recommend Codahale as it provides summary statistics (per
 of the box for certain metric types. These are automatically exposed via JVM and can be viewed
 and graphed with the likes of the VisualVM JMX plugin. 
 
+Some differences in metric types exist between Prometheus and Codahale. In particular, with Prometheus
+you don't decrement counters, instead you use gauges for values that increase and decrease. Supporting
+this approach with Codahale gauges with an agent is tricky as we need to maintain a class variable. Hence,
+we simply use counters to back gauges with Codahale. 
+
 Profiling agents can sometimes be far to heavy to attach to a JVM for a prolonged period of 
 time and impact performance when we only want to monitor certain methods / hotspots. 
 Also, most of the time these tools do not provide summary metrics exception counts which 

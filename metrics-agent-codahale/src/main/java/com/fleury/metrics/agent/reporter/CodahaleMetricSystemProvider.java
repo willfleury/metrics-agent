@@ -6,9 +6,9 @@ package com.fleury.metrics.agent.reporter;
  */
 public class CodahaleMetricSystemProvider implements MetricSystemProvider {
 
-	@Override
-	public MetricSystem createMetricSystem() {
-		return new CodahaleMetricSystem();
-	}
+    @Override
+    public MetricSystem createMetricSystem() {
+        return new CodahaleMetricSystem();
+    }
 
 }

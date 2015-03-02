@@ -10,55 +10,56 @@ import java.util.Map;
  *
  * @author Will Fleury
  */
-public  class Metric {
-	
-	private MetricType type;
-	private String name;
-	private String doc;
-	private List<String> labels;
-	private Map<String, String> ext = new HashMap<String, String>();
-	
-	public Metric() { }
-	
-	public Metric(MetricType type) {
-		this.type = type;
-	}
-	
-	public MetricType getType() {
-		return type;
-	}
+public class Metric {
 
-	public String getName() {
-		return name;
-	}
+    private MetricType type;
+    private String name;
+    private String doc;
+    private List<String> labels;
+    private Map<String, String> ext = new HashMap<String, String>();
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public Metric() {
+    }
 
-	public List<String> getLabels() {
-		return labels;
-	}
+    public Metric(MetricType type) {
+        this.type = type;
+    }
 
-	public void setLabels(List<String> labels) {
-		this.labels = labels;
-	}
-	
-	public String getDoc() {
-		return doc;
-	}
+    public MetricType getType() {
+        return type;
+    }
 
-	public void setDoc(String doc) {
-		this.doc = doc;
-	}
+    public String getName() {
+        return name;
+    }
 
-	@JsonAnyGetter
-	public Map<String, String> getExt() {
-		return ext;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@JsonAnySetter
-	public void setExt(Map<String, String> ext) {
-		this.ext = ext;
-	}
+    public List<String> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(List<String> labels) {
+        this.labels = labels;
+    }
+
+    public String getDoc() {
+        return doc;
+    }
+
+    public void setDoc(String doc) {
+        this.doc = doc;
+    }
+
+    @JsonAnyGetter
+    public Map<String, String> getExt() {
+        return ext;
+    }
+
+    @JsonAnySetter
+    public void setExt(Map<String, String> ext) {
+        this.ext = ext;
+    }
 }

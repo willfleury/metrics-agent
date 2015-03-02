@@ -15,9 +15,9 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface Metered {
 
-	public String name();
-	
-	public String[] labels() default {};
-	
-	public String doc() default "";
+    String name();
+
+    String[] labels() default {};
+
+    String doc() default "";
 }
