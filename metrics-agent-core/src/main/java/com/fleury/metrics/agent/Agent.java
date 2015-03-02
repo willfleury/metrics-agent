@@ -11,9 +11,9 @@ import java.lang.instrument.Instrumentation;
  */
 public class Agent {
 
-	public static void premain(String args, Instrumentation instrumentation) {
-		Configuration config = Configuration.createConfig(new Args(args).getConfigFilename());
+    public static void premain(String args, Instrumentation instrumentation) {
+        Configuration config = Configuration.createConfig(new Args(args).getConfigFilename());
 
-		instrumentation.addTransformer(new AnnotatedMetricClassTransformer(config));
-	}
+        instrumentation.addTransformer(new AnnotatedMetricClassTransformer(config));
+    }
 }

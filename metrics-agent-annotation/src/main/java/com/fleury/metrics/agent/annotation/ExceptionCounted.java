@@ -15,11 +15,11 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface ExceptionCounted {
 
-	public String name();
-	
-	public String[] labels() default {};
-	
-	public String doc() default "";
-	
-	public String[] include() default {}; 
+    String name();
+
+    String[] labels() default {};
+
+    String doc() default "";
+
+    String[] include() default {};
 }

@@ -12,22 +12,21 @@ import org.objectweb.asm.commons.AdviceAdapter;
  * @author Will Fleury
  */
 public class ExceptionCounterInjector extends AbstractInjector {
-	
-	private static final String METHOD = "recordCount";
-	private static final String SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;)V";
-	
-	
-	public ExceptionCounterInjector(Metric metric, AdviceAdapter aa, MethodVisitor mv, Type[] argTypes) {
-		super(metric, aa, mv, argTypes);
-	}
 
-	@Override
-	public void injectAtMethodExit(int opcode) {
-		if (opcode == ATHROW) {
-			injectNameAndLabelToStack();
+    private static final String METHOD = "recordCount";
+    private static final String SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;)V";
 
-			mv.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, METHOD, SIGNATURE, false);
-		}
-	}
+    public ExceptionCounterInjector(Metric metric, AdviceAdapter aa, MethodVisitor mv, Type[] argTypes) {
+        super(metric, aa, mv, argTypes);
+    }
+
+    @Override
+    public void injectAtMethodExit(int opcode) {
+        if (opcode == ATHROW) {
+            injectNameAndLabelToStack();
+
+            mv.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, METHOD, SIGNATURE, false);
+        }
+    }
 
 }

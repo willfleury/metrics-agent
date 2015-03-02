@@ -6,8 +6,8 @@ package com.fleury.metrics.agent.reporter;
  */
 public class TestMetricSystemProvider implements MetricSystemProvider {
 
-	@Override
-	public MetricSystem createMetricSystem() {
-		return new TestMetricSystem();
-	}
+    @Override
+    public MetricSystem createMetricSystem() {
+        return new TestMetricSystem();
+    }
 }

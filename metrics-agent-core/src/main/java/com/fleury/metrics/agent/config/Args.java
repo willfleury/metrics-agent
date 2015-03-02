@@ -6,17 +6,17 @@ package com.fleury.metrics.agent.config;
  */
 public class Args {
 
-	private final String agentArgs;
-	
-	public Args(String agentArgs) {
-		this.agentArgs = agentArgs;
-	}
-	
-	public String getConfigFilename() {
-		if (agentArgs == null || agentArgs.isEmpty()) {
-			return System.getProperty("agent-config");
-		}
-		
-		return agentArgs.split(":")[1];
-	}
+    private final String agentArgs;
+
+    public Args(String agentArgs) {
+        this.agentArgs = agentArgs;
+    }
+
+    public String getConfigFilename() {
+        if (agentArgs == null || agentArgs.isEmpty()) {
+            return System.getProperty("agent-config");
+        }
+
+        return agentArgs.split(":")[1];
+    }
 }
