@@ -247,13 +247,37 @@ can be recorded with this library.
 
 ## Performance
 We use the Java ASM bytecode manipulation library. This is the lowest level and fastest of all the bytecode 
-libraries and is used by the likes of cglib. 
+libraries which is used by the likes of cglib. It allows us to inject bytecode in a precise way which means
+we can craft the exact same bytecode as if it was hand written. 
 
-Application startup time is affected slightly (approx 2 sec to instrument every method in core Java library - RT.jar)
+Application startup time is affected slightly (milliseconds for small to a second for very large applications)
 
 As the bytecode is the exact same as if you were to manually instrument the code by hand,
-the Application runtime has no additional performance penalty for using this library than
-if you manually instrumented.
+the Application has no real performance overhead than if you wrote it by hand. However, there is currently
+one performance penalty which must be paid which is not always the case with hand crafted. To make the 
+metric system pluggable, we chose to abstract the metric work behind a generic SPI interface. The bytecode
+which we inject uses the SPI which can in turn be swapped out without any change to our bytecode. This makes 
+it very flexible but it comes at the cost of no being able to keep field level static variable references
+for our metrics. Instead we perfom a lookup from a ConcurrentHashMap to get the metric by name in the SPIs. 
+Note that JIT takes care of the additional method dispatches up to the Map by performing inlining.
+
+The reason we chose ConcurrentHashMap and not HashMap is that it even though we don't require its concurrency
+features (as registration (put) is single threaded), it has better performance characteristics for
+get() across the various generations of JDKs this library supports (JDK 6+). It uses slightly more memory than
+basic HashMap but this is a negligable concern. On average the lookup adds an additional 10 nanoseconds overhead
+on metric operations. To put this into context; if you are instrumenting a request dispatcher and the average 
+request duration is 1 millisecond, then the effect of the lookup is an additional overhead of 0.000001%. If however
+this is a performance sensitive method which has a typical invocation duration in the nanoseconds then hand crafted
+metrics should be considered. We are investigating enabling the injection of the metric system specific static fields
+for performance and / or using a faster lookup data structure like [Koloboke](https://github.com/OpenHFT/Koloboke) 
+which appear to reduce the average lookup time by about 50% (5 nanosecond region).
+
+On basic counters, this is noticable but on other metric types it becomes less observable.
+We did notice however that when using labels with Prometheus counters there is a significant overhead introduced 
+which makes the lookup even less noticable. Here are some basic figures of both Prometheus and Codahale counters
+with and without lookups performed.
+
+    TODO: link to benchmark results here
  
 
 ## Dependencies 
@@ -265,8 +289,7 @@ Very lightweight.
 	log4j
 
 The client libraries for whatever metric provider you choose are also included. 
-Note that the final agent binaries are shaded and all dependencies relocated to prevent
-possible conflicts.
+Note that the final agent binaries are shaded and all dependencies relocated to prevent possible conflicts.
 
 
 # Building
