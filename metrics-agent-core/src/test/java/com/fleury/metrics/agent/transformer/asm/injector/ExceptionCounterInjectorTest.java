@@ -71,6 +71,10 @@ public class ExceptionCounterInjectorTest extends BaseMetricTest {
 
         @ExceptionCounted(name = "constructor", labels = "exception:type1")
         public ExceptionCountedConstructorClass() {
+            callService();
+        }
+        
+        public final void callService() {
             BaseMetricTest.performBasicTask();
             throw new RuntimeException(EXCEPTION_TEXT);
         }
@@ -80,6 +84,10 @@ public class ExceptionCounterInjectorTest extends BaseMetricTest {
 
         @ExceptionCounted(name = "exceptionCounted")
         public void exceptionCounted() {
+            callService();
+        }
+        
+        public final void callService() {
             BaseMetricTest.performBasicTask();
             throw new RuntimeException(EXCEPTION_TEXT);
         }

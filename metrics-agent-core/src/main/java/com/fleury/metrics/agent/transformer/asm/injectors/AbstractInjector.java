@@ -6,17 +6,7 @@ import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.transformer.asm.util.OpCodeUtil;
 import java.util.List;
 import org.objectweb.asm.MethodVisitor;
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.DLOAD;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.FLOAD;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.LLOAD;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 
@@ -24,7 +14,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
  *
  * @author Will Fleury
  */
-public abstract class AbstractInjector implements Injector {
+public abstract class AbstractInjector implements Injector, Opcodes {
 
     public static final String METRIC_REPORTER_CLASSNAME = Type.getType(Reporter.class).getInternalName();
 
