@@ -259,7 +259,10 @@ metric system pluggable, we chose to abstract the metric work behind a generic S
 which we inject uses the SPI which can in turn be swapped out without any change to our bytecode. This makes 
 it very flexible but it comes at the cost of no being able to keep field level static variable references
 for our metrics. Instead we perfom a lookup from a ConcurrentHashMap to get the metric by name in the SPIs. 
-Note that JIT takes care of the additional method dispatches up to the Map by performing inlining.
+Note that JIT takes care of the additional method dispatches up to the Map by performing inlining. To change 
+to injecting field variables into the classes instead of performing this lookup via the SPI would require 
+the use of the ASM Tree API. Currently we chose the visitors API and so a refactor would be necessary. We are 
+not ruling this out, instead stating that its not going to be in the first few iterations.
 
 The reason we chose ConcurrentHashMap and not HashMap is that it even though we don't require its concurrency
 features (as registration (put) is single threaded), it has better performance characteristics for
@@ -268,16 +271,18 @@ basic HashMap but this is a negligable concern. On average the lookup adds an ad
 on metric operations. To put this into context; if you are instrumenting a request dispatcher and the average 
 request duration is 1 millisecond, then the effect of the lookup is an additional overhead of 0.000001%. If however
 this is a performance sensitive method which has a typical invocation duration in the nanoseconds then hand crafted
-metrics should be considered. We are investigating enabling the injection of the metric system specific static fields
-for performance and / or using a faster lookup data structure like [Koloboke](https://github.com/OpenHFT/Koloboke) 
-which appear to reduce the average lookup time by about 50% (5 nanosecond region).
+metrics should be considered. Similarly if there are many hash collisions this lookup will become slower.
+We are investigating using a faster lookup data structure like [Koloboke](https://github.com/OpenHFT/Koloboke) 
+which appear to reduce the average lookup time by about 50% (5 nanosecond region) by utilising more memory.
 
 On basic counters, this is noticable but on other metric types it becomes less observable.
 We did notice however that when using labels with Prometheus counters there is a significant overhead introduced 
 which makes the lookup even less noticable. Here are some basic figures of both Prometheus and Codahale counters
-with and without lookups performed.
+with and without lookups performed. 
 
-    TODO: link to benchmark results here
+We will produce JMH benchmarks to prove the above notes, however since we are only adding an additional map based
+lookup the benchmarks do not add much to the respective metric system benchmarks apart from also measuring 
+this lookup.  
  
 
 ## Dependencies 
