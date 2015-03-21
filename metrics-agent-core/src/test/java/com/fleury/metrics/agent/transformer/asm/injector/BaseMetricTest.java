@@ -51,15 +51,22 @@ public abstract class BaseMetricTest {
 
         cr.accept(mcv, ClassReader.EXPAND_FRAMES);
 
+        traceBytecode(cw.toByteArray());
         verifyBytecode(cw.toByteArray());
 
         return getClassFromBytes(clazz, cw.toByteArray());
+    }
+    
+    private void traceBytecode(byte[] bytecode) {
+        ClassReader cr = new ClassReader(bytecode);
+        ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        cr.accept(new TraceClassVisitor(cw, new PrintWriter(System.out)), 0);
     }
 
     private void verifyBytecode(byte[] bytecode) {
         ClassReader cr = new ClassReader(bytecode);
         ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        cr.accept(new CheckClassAdapter(new TraceClassVisitor(cw, new PrintWriter(System.out))), 0);
+        cr.accept(new CheckClassAdapter(cw), 0);
     }
 
     public static class ByteCodeClassLoader extends ClassLoader {

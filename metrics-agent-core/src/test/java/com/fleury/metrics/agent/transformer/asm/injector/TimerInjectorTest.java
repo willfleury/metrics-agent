@@ -113,10 +113,15 @@ public class TimerInjectorTest extends BaseMetricTest {
         public void timed() {
             try {
                 Thread.sleep(10L);
-                throw new RuntimeException();
+                callService();
             }
             catch (InterruptedException e) {
             }
+        }
+        
+        private void callService() {
+            BaseMetricTest.performBasicTask();
+            throw new RuntimeException();
         }
     }
 }

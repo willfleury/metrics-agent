@@ -7,9 +7,9 @@ import com.fleury.metrics.agent.model.MetricType;
 import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.transformer.asm.injectors.Injector;
 import com.fleury.metrics.agent.transformer.asm.injectors.InjectorFactory;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -21,11 +21,12 @@ import org.objectweb.asm.commons.AdviceAdapter;
  */
 public class MetricAdapter extends AdviceAdapter {
 
-    private final LinkedHashMap<MetricType, Metric> metrics = new LinkedHashMap<MetricType, Metric>();
-    private final List<Injector> injectors = new ArrayList<Injector>();
+    private final Map<MetricType, Metric> metrics = new HashMap<MetricType, Metric>();
     private final AnnotationScanner annotationScanner;
     private final Type[] argTypes;
     private final String methodName;
+    
+    private List<Injector> injectors;
 
     public MetricAdapter(List<Metric> configMetrics, MethodVisitor mv, int access, String name, String desc) {
         super(ASM5, mv, access, name, desc);
@@ -40,7 +41,6 @@ public class MetricAdapter extends AdviceAdapter {
     private void registerConfigurationMetrics(List<Metric> configMetrics) {
         for (Metric metric : configMetrics) {
             metrics.put(metric.getType(), metric);
-            injectors.add(InjectorFactory.createInjector(metric, this, mv, argTypes));
         }
     }
 
@@ -48,8 +48,6 @@ public class MetricAdapter extends AdviceAdapter {
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         Metric metatdata = annotationScanner.checkSignature(desc);
         if (metatdata != null) {
-            injectors.add(InjectorFactory.createInjector(metatdata, this, mv, argTypes));
-
             return new MetricAnnotationAttributeVisitor(super.visitAnnotation(desc, visible), metatdata);
         }
 
@@ -58,6 +56,7 @@ public class MetricAdapter extends AdviceAdapter {
 
     @Override
     protected void onMethodEnter() {
+        injectors = InjectorFactory.createInjectors(metrics, this, argTypes);
         validateLabels();
         Reporter.registerMetrics(metrics.values());
 

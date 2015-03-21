@@ -105,10 +105,15 @@ public class MixedInjectorTest extends BaseMetricTest {
         public void timed() {
             try {
                 Thread.sleep(10L);
-                throw new RuntimeException();
+                callService();
             }
             catch (InterruptedException e) {
             }
+        }
+        
+        public final void callService() {
+            BaseMetricTest.performBasicTask();
+            throw new RuntimeException();
         }
     }
 }

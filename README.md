@@ -283,6 +283,12 @@ with and without lookups performed.
 We will produce JMH benchmarks to prove the above notes, however since we are only adding an additional map based
 lookup the benchmarks do not add much to the respective metric system benchmarks apart from also measuring 
 this lookup.  
+
+It should be noted that as with hand crafted metrics, the additional bytecode and hence method size required
+to handle capturing all metrics could potentially lead to methods which might otherwise have been inlined
+or compiled by the JIT being skipped instead. This should be considered regardless off the instrumentation
+choice and if unsure, the appropriate JVM output should be checked 
+(-XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining -XX:+PrintCompilation).
  
 
 ## Dependencies 

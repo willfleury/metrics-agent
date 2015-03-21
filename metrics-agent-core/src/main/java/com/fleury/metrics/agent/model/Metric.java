@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Will Fleury
  */
 public class Metric {
-
+   
     private MetricType type;
     private String name;
     private String doc;

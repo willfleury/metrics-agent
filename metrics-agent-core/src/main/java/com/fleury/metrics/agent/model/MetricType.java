@@ -28,7 +28,7 @@ public enum MetricType {
     public Class getAnnotation() {
         return annotation;
     }
-
+    
     public String getDesc() {
         return desc;
     }

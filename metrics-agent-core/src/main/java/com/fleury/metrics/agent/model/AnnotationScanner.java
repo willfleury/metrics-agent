@@ -4,7 +4,7 @@ import static com.fleury.metrics.agent.model.MetricType.Counted;
 import static com.fleury.metrics.agent.model.MetricType.ExceptionCounted;
 import static com.fleury.metrics.agent.model.MetricType.Gauged;
 import static com.fleury.metrics.agent.model.MetricType.Timed;
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  *
@@ -12,9 +12,9 @@ import java.util.LinkedHashMap;
  */
 public class AnnotationScanner {
 
-    private final LinkedHashMap<MetricType, Metric> registry;
+    private final Map<MetricType, Metric> registry;
 
-    public AnnotationScanner(LinkedHashMap<MetricType, Metric> registry) {
+    public AnnotationScanner(Map<MetricType, Metric> registry) {
         this.registry = registry;
     }
 
