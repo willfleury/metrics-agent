@@ -33,7 +33,7 @@ public class ExceptionCounterInjector extends AbstractInjector {
         catchBlockStart = new Label();
         catchBlockEnd = new Label();
 
-        aa.visitTryCatchBlock(tryBlockStart, tryBlockEnd, catchBlockStart, "java/lang/Exception");
+        aa.visitTryCatchBlock(tryBlockStart, tryBlockEnd, catchBlockStart, "java/lang/Throwable");
         aa.visitLabel(tryBlockStart);
     }
 
@@ -44,7 +44,7 @@ public class ExceptionCounterInjector extends AbstractInjector {
         
         aa.visitLabel(catchBlockStart);
 
-        int exVar = aa.newLocal(Type.getType(RuntimeException.class));
+        int exVar = aa.newLocal(Type.getType(Throwable.class));
         aa.visitVarInsn(ASTORE, exVar);
         
         injectNameAndLabelToStack(metric);

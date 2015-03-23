@@ -74,6 +74,13 @@ With agent based instrumentation we can inject bytecode which results in the
 exact same method bytecode as would be produced by writing and compiling the final metric example,
 but without touching the source.
 
+### Dependency Injection 
+Dependency injection frameworks like Spring and Guice have support and libraries to enable annotation 
+driven instrumentation of classes. However, to reply on DI frameworks to instrument class it means
+that the classes you want to instrument must be injected via the framework.
+This results in some severe restrictions and can be quite painful when you think a method is 
+being instrumented but in fact it is not.
+
 
 ### Third Party Code
 Sometimes we don't have access to the source code for a piece of code we would like to 
@@ -96,6 +103,7 @@ Incorrectly naming a metric can also be considered a bug. Fixing this with manua
 requires a code change and redeploy. This is also the case if using annotation based agent
 instrumentation. However, if using the configuration driven agent instrumentation then this 
 is a simple matter of updating the configuration and restarting the application.
+
 
 
 ## Features
@@ -206,8 +214,8 @@ We write the configuration as follows
 
 Note the method signature is based on the method parameter types and return type. The
 parameter types are between the brackets () with the return type after. In this case
-we have no parameters and the return type is void (V). Here is a good overview of Java
-method signature mappings (TODO: link to correct JVM spec section)
+we have no parameters and the return type is void which results in ()V. 
+Here is a good overview of Java method signature mappings
 
 http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html
 
@@ -260,9 +268,9 @@ which we inject uses the SPI which can in turn be swapped out without any change
 it very flexible but it comes at the cost of no being able to keep field level static variable references
 for our metrics. Instead we perfom a lookup from a ConcurrentHashMap to get the metric by name in the SPIs. 
 Note that JIT takes care of the additional method dispatches up to the Map by performing inlining. To change 
-to injecting field variables into the classes instead of performing this lookup via the SPI would require 
-the use of the ASM Tree API. Currently we chose the visitors API and so a refactor would be necessary. We are 
-not ruling this out, instead stating that its not going to be in the first few iterations.
+to injecting field variables into the classes instead of performing this lookup via the SPI would require chaning to
+either the ASM Tree API or removing ability to use annotations. The reason is that we visit the method annotations
+after the class fields. We will look at both options going forward.
 
 The reason we chose ConcurrentHashMap and not HashMap is that it even though we don't require its concurrency
 features (as registration (put) is single threaded), it has better performance characteristics for
