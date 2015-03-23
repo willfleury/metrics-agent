@@ -252,6 +252,18 @@ time and impact performance when we only want to monitor certain methods / hotsp
 Also, most of the time these tools do not provide summary metrics exception counts which 
 can be recorded with this library.
 
+### Configuration
+
+The metric systems configuration is passed as simple key-value pairs (Map<String,String>) to 
+the constructor of each MetricSystem via their provider. These key-values are defined in the
+"system" section of the agent configuration.
+
+    metrics:
+        .....
+
+    system:
+        key1: value1
+
 
 ## Performance
 We use the Java ASM bytecode manipulation library. This is the lowest level and fastest of all the bytecode 

@@ -1,6 +1,7 @@
 package com.fleury.metrics.agent.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -33,7 +34,12 @@ public class Configuration {
         }
     };
 
+    @JsonProperty("metrics")
     private Map<Key, List<Metric>> metrics;
+    
+    @JsonProperty("system")
+    private Map<String, String> metricSystemConfiguration;
+    
 
     public Configuration() {
         this(new HashMap<Key, List<Metric>>());
@@ -48,8 +54,12 @@ public class Configuration {
         return metrics.containsKey(key) ? metrics.get(key) : Collections.<Metric>emptyList();
     }
 
-    public Map<Key, List<Metric>> getAllMetrics() {
+    public Map<Key, List<Metric>> getMetrics() {
         return metrics;
+    }
+    
+    public Map<String, String> getMetricSystemConfiguration() {
+        return metricSystemConfiguration;
     }
 
     public static Configuration createConfig(String filename) {

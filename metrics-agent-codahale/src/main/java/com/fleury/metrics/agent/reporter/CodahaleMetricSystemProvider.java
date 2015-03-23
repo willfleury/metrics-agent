@@ -1,5 +1,7 @@
 package com.fleury.metrics.agent.reporter;
 
+import java.util.Map;
+
 /**
  *
  * @author Will Fleury
@@ -7,8 +9,8 @@ package com.fleury.metrics.agent.reporter;
 public class CodahaleMetricSystemProvider implements MetricSystemProvider {
 
     @Override
-    public MetricSystem createMetricSystem() {
-        return new CodahaleMetricSystem();
+    public MetricSystem createMetricSystem(Map<String, String> configuration) {
+        return new CodahaleMetricSystem(configuration);
     }
 
 }

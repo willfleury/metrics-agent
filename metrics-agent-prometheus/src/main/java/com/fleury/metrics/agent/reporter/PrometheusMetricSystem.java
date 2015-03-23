@@ -17,8 +17,11 @@ public class PrometheusMetricSystem implements MetricSystem {
     private final static Map<String, Counter> COUNTERS = new ConcurrentHashMap<String, Counter>();
     private final static Map<String, Gauge> GAUGES = new ConcurrentHashMap<String, Gauge>();
     private final static Map<String, Summary> SUMMARIES = new ConcurrentHashMap<String, Summary>();
+    
+    private final Map<String, String> configuration;
 
-    protected PrometheusMetricSystem() {
+    protected PrometheusMetricSystem(Map<String, String> configuration) {
+        this.configuration = configuration;
         new StandardExports().register();
     }
 

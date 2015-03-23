@@ -18,3 +18,8 @@ metrics:
       doc: trying to time
       labels: ['name1:value1', 'name2:value2']
        
+
+
+system:
+    key1: value1
+    

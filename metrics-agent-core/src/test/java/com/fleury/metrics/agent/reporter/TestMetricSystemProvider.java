@@ -1,5 +1,7 @@
 package com.fleury.metrics.agent.reporter;
 
+import java.util.Map;
+
 /**
  *
  * @author Will Fleury
@@ -7,7 +9,7 @@ package com.fleury.metrics.agent.reporter;
 public class TestMetricSystemProvider implements MetricSystemProvider {
 
     @Override
-    public MetricSystem createMetricSystem() {
+    public MetricSystem createMetricSystem(Map<String, String> configuration) {
         return new TestMetricSystem();
     }
 }

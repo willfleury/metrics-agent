@@ -2,6 +2,7 @@ package com.fleury.metrics.agent.reporter;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,10 @@ public class CodahaleMetricSystem implements MetricSystem {
     private final static Logger LOGGER = LoggerFactory.getLogger(CodahaleMetricSystem.class);
 
     private final MetricRegistry registry = new MetricRegistry();
+    private final Map<String, String> configuration;
 
-    public CodahaleMetricSystem() {
+    public CodahaleMetricSystem(Map<String, String> configuration) {
+        this.configuration = configuration;
         startJmxReporter();
     }
 

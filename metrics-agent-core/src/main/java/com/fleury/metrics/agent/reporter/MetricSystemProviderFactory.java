@@ -3,6 +3,7 @@ package com.fleury.metrics.agent.reporter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 
 /**
@@ -13,14 +14,24 @@ public class MetricSystemProviderFactory {
 
     public static final MetricSystemProviderFactory INSTANCE = new MetricSystemProviderFactory();
 
-    private final MetricSystemProvider system;
+    private final MetricSystemProvider provider;
+    
+    private Map<String, String> configuration;
 
     private MetricSystemProviderFactory() {
-        this.system = initialiseMetricSystem();
+        this.provider = initialiseMetricSystem();
+    }
+    
+    public void setMetricSystemConfiguration(Map<String, String> configuration) {
+        this.configuration = configuration;
     }
 
     public MetricSystemProvider getProvider() {
-        return system;
+        return provider;
+    }
+    
+    public MetricSystem createMetricSystem() {
+        return provider.createMetricSystem(configuration);
     }
 
     private MetricSystemProvider initialiseMetricSystem() {

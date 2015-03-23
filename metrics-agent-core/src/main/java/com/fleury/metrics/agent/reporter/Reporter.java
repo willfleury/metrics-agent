@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
  */
 public class Reporter {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(Reporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Reporter.class);
 
-    public static final MetricSystem METRIC_SYSTEM = MetricSystemProviderFactory.INSTANCE.getProvider().createMetricSystem();
+    public static final MetricSystem METRIC_SYSTEM = MetricSystemProviderFactory.INSTANCE.createMetricSystem();
 
     public static void registerMetrics(Collection<Metric> metrics) {
         for (Metric metric : metrics) {
