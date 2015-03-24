@@ -38,6 +38,7 @@ public class TimerInjector extends AbstractInjector {
         Label endFinally = new Label();
         aa.visitTryCatchBlock(startFinally, endFinally, endFinally, null);
         aa.visitLabel(endFinally);
+        
         onFinally(ATHROW);
         aa.visitInsn(ATHROW);
     }

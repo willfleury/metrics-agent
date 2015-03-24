@@ -16,44 +16,28 @@ public class ExceptionCounterInjector extends AbstractInjector {
     
     private final Metric metric;
     
-    private Label tryBlockStart;
-    private Label tryBlockEnd;
-    private Label catchBlockStart;
-    private Label catchBlockEnd;
+    private Label startFinally;
 
     public ExceptionCounterInjector(Metric metric, AdviceAdapter aa, Type[] argTypes) {
         super(aa, argTypes);
         this.metric = metric;
     }
-    
+
     @Override
     public void injectAtMethodEnter() {
-        tryBlockStart = new Label();
-        tryBlockEnd = new Label();
-        catchBlockStart = new Label();
-        catchBlockEnd = new Label();
-
-        aa.visitTryCatchBlock(tryBlockStart, tryBlockEnd, catchBlockStart, "java/lang/Throwable");
-        aa.visitLabel(tryBlockStart);
+        startFinally = new Label();
+        aa.visitLabel(startFinally);
     }
 
     @Override
     public void injectAtVisitMaxs(int maxStack, int maxLocals) {
-        aa.visitLabel(tryBlockEnd);
-        aa.visitJumpInsn(GOTO, catchBlockEnd);
-        
-        aa.visitLabel(catchBlockStart);
-
-        int exVar = aa.newLocal(Type.getType(Throwable.class));
-        aa.visitVarInsn(ASTORE, exVar);
+        Label endFinally = new Label();
+        aa.visitTryCatchBlock(startFinally, endFinally, endFinally, null);
+        aa.visitLabel(endFinally);
         
         injectNameAndLabelToStack(metric);
-
         aa.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, METHOD, SIGNATURE, false);
         
-        aa.visitVarInsn(ALOAD, exVar);
         aa.visitInsn(ATHROW);
-        
-        aa.visitLabel(catchBlockEnd);
     }
 }

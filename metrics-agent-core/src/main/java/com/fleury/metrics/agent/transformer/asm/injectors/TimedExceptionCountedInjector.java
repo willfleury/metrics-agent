@@ -7,9 +7,9 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  *
- * @author Will Fleury <will.fleury at boxever.com>
+ * @author Will Fleury
  */
-public class TimerAndExceptionCountedInjector extends AbstractInjector {
+public class TimedExceptionCountedInjector extends AbstractInjector {
     
     private static final String EXCEPTION_COUNT_METHOD = "recordCount";
     private static final String EXCEPTION_COUNT_SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;)V";
@@ -21,13 +21,9 @@ public class TimerAndExceptionCountedInjector extends AbstractInjector {
     private final Metric exceptionMetric;
     
     private int startTimeVar;
+    private Label startFinally;
     
-    private Label tryBlockStart;
-    private Label tryBlockEnd;
-    private Label catchBlockStart;
-    private Label catchBlockEnd;
-    
-    public TimerAndExceptionCountedInjector(Metric timerMetric, Metric exceptionMetric, AdviceAdapter aa, Type[] argTypes) {
+    public TimedExceptionCountedInjector(Metric timerMetric, Metric exceptionMetric, AdviceAdapter aa, Type[] argTypes) {
         super(aa, argTypes);
         this.timerMetric = timerMetric;
         this.exceptionMetric = exceptionMetric;
@@ -35,19 +31,26 @@ public class TimerAndExceptionCountedInjector extends AbstractInjector {
 
     @Override
     public void injectAtMethodEnter() {
+        startFinally = new Label();
         startTimeVar = aa.newLocal(Type.LONG_TYPE);
         aa.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false);
         aa.visitVarInsn(LSTORE, startTimeVar);
-        
-        tryBlockStart = new Label();
-        tryBlockEnd = new Label();
-        catchBlockStart = new Label();
-        catchBlockEnd = new Label();
-
-        aa.visitTryCatchBlock(tryBlockStart, tryBlockEnd, catchBlockStart, "java/lang/Throwable");
-        aa.visitLabel(tryBlockStart);
+        aa.visitLabel(startFinally);
     }
-    
+
+    @Override
+    public void injectAtVisitMaxs(int maxStack, int maxLocals) {
+        Label endFinally = new Label();
+        aa.visitTryCatchBlock(startFinally, endFinally, endFinally, null);
+        aa.visitLabel(endFinally);
+        
+        injectNameAndLabelToStack(exceptionMetric);
+        aa.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, EXCEPTION_COUNT_METHOD, EXCEPTION_COUNT_SIGNATURE, false);
+        
+        onFinally(ATHROW);
+        aa.visitInsn(ATHROW);
+    }
+
     @Override
     public void injectAtMethodExit(int opcode) {
         if (opcode != ATHROW) {
@@ -55,28 +58,6 @@ public class TimerAndExceptionCountedInjector extends AbstractInjector {
         }
     }
 
-    @Override
-    public void injectAtVisitMaxs(int maxStack, int maxLocals) {
-        aa.visitLabel(tryBlockEnd);
-        aa.visitJumpInsn(GOTO, catchBlockEnd);
-        
-        aa.visitLabel(catchBlockStart);
-
-        int exVar = aa.newLocal(Type.getType(Throwable.class));
-        aa.visitVarInsn(ASTORE, exVar);
-        
-        injectNameAndLabelToStack(exceptionMetric);
-
-        aa.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, EXCEPTION_COUNT_METHOD, EXCEPTION_COUNT_SIGNATURE, false);
-        
-        onFinally(ATHROW);
-        
-        aa.visitVarInsn(ALOAD, exVar);
-        aa.visitInsn(ATHROW);
-        
-        aa.visitLabel(catchBlockEnd);
-    }
-    
     private void onFinally(int opcode) {
         injectNameAndLabelToStack(timerMetric);
 

@@ -116,7 +116,7 @@ public class TimerInjectorTest extends BaseMetricTest {
                 callService();
             }
             catch (InterruptedException e) {
-            }
+            } 
         }
         
         private void callService() {

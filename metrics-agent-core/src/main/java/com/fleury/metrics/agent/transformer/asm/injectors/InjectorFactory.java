@@ -23,7 +23,7 @@ public class InjectorFactory {
         
         //handle special case for both exception counter and timer (try catch finally)
         if (metrics.containsKey(ExceptionCounted) && metrics.containsKey(Timed)) {
-            injectors.add(new TimerAndExceptionCountedInjector(
+            injectors.add(new TimedExceptionCountedInjector(
                     metrics.get(Timed), 
                     metrics.get(ExceptionCounted), 
                     adviceAdapter, argTypes));
