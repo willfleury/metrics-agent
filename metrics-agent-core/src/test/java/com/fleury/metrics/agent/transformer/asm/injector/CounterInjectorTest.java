@@ -1,5 +1,8 @@
 package com.fleury.metrics.agent.transformer.asm.injector;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fleury.metrics.agent.annotation.Counted;
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.model.Metric;
@@ -8,8 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 

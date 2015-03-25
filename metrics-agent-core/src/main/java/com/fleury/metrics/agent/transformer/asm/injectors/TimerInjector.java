@@ -19,8 +19,8 @@ public class TimerInjector extends AbstractInjector {
     private int startTimeVar;
     private Label startFinally;
 
-    public TimerInjector(Metric metric, AdviceAdapter aa, Type[] argTypes) {
-        super(aa, argTypes);
+    public TimerInjector(Metric metric, AdviceAdapter aa, Type[] argTypes, int access) {
+        super(aa, argTypes, access);
         this.metric = metric;
     }
 

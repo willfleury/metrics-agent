@@ -16,8 +16,8 @@ public class GaugeInjector extends AbstractInjector {
 
     private final Metric metric;
     
-    public GaugeInjector(Metric metric, AdviceAdapter aa, Type[] argTypes) {
-        super(aa, argTypes);
+    public GaugeInjector(Metric metric, AdviceAdapter aa, Type[] argTypes, int access) {
+        super(aa, argTypes, access);
         this.metric = metric;
     }
 

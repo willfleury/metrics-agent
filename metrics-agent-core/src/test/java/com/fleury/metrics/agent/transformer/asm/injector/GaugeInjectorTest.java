@@ -1,8 +1,9 @@
 package com.fleury.metrics.agent.transformer.asm.injector;
 
+import static org.junit.Assert.assertEquals;
+
 import com.fleury.metrics.agent.annotation.Gauged;
 import com.fleury.metrics.agent.annotation.Gauged.mode;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**

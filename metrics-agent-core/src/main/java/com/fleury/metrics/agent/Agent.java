@@ -14,7 +14,7 @@ public class Agent {
 
     public static void premain(String args, Instrumentation instrumentation) {
         Configuration config = Configuration.createConfig(new Args(args).getConfigFilename());
-        MetricSystemProviderFactory.INSTANCE.setMetricSystemConfiguration(config.getMetricSystemConfiguration());
+        MetricSystemProviderFactory.INSTANCE.init(config.getMetricSystemConfiguration());
 
         instrumentation.addTransformer(new AnnotatedMetricClassTransformer(config));
     }

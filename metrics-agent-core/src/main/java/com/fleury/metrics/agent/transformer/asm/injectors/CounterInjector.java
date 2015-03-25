@@ -15,8 +15,8 @@ public class CounterInjector extends AbstractInjector {
     
     private final Metric metric;
 
-    public CounterInjector(Metric metric, AdviceAdapter aa, Type[] argTypes) {
-        super(aa, argTypes);
+    public CounterInjector(Metric metric, AdviceAdapter aa, Type[] argTypes, int access) {
+        super(aa, argTypes, access);
         this.metric = metric;
     }
 

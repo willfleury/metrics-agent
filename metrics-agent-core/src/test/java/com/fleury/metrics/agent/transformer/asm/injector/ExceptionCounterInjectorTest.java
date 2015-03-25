@@ -1,10 +1,11 @@
 package com.fleury.metrics.agent.transformer.asm.injector;
 
-import com.fleury.metrics.agent.annotation.ExceptionCounted;
-import java.lang.reflect.InvocationTargetException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import com.fleury.metrics.agent.annotation.ExceptionCounted;
+import java.lang.reflect.InvocationTargetException;
 import org.junit.Test;
 
 /**

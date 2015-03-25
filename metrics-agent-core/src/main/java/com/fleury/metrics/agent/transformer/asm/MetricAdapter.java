@@ -25,6 +25,7 @@ public class MetricAdapter extends AdviceAdapter {
     private final AnnotationScanner annotationScanner;
     private final Type[] argTypes;
     private final String methodName;
+    private final int access;
     
     private List<Injector> injectors;
 
@@ -33,6 +34,7 @@ public class MetricAdapter extends AdviceAdapter {
 
         this.methodName = name;
         this.argTypes = Type.getArgumentTypes(desc);
+        this.access = access;
         this.annotationScanner = new AnnotationScanner(metrics);
 
         registerConfigurationMetrics(configMetrics);
@@ -56,7 +58,7 @@ public class MetricAdapter extends AdviceAdapter {
 
     @Override
     protected void onMethodEnter() {
-        injectors = InjectorFactory.createInjectors(metrics, this, argTypes);
+        injectors = InjectorFactory.createInjectors(metrics, this, argTypes, access);
         validateLabels();
         Reporter.registerMetrics(metrics.values());
 
@@ -83,7 +85,7 @@ public class MetricAdapter extends AdviceAdapter {
 
     private void validateLabels() {
         for (Metric metric : metrics.values()) {
-            LabelUtil.validateLabelValues(methodName, metric.getLabels(), argTypes.length);
+            LabelUtil.validateLabelValues(methodName, metric.getLabels(), argTypes);
         }
     }
 }

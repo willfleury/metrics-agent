@@ -18,8 +18,8 @@ public class ExceptionCounterInjector extends AbstractInjector {
     
     private Label startFinally;
 
-    public ExceptionCounterInjector(Metric metric, AdviceAdapter aa, Type[] argTypes) {
-        super(aa, argTypes);
+    public ExceptionCounterInjector(Metric metric, AdviceAdapter aa, Type[] argTypes, int access) {
+        super(aa, argTypes, access);
         this.metric = metric;
     }
 

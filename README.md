@@ -118,17 +118,18 @@ TODO - link to Prometheus docs on good usage and definitions etc.
 ### Dynamic Label Values
 
 Label values can be dynamic and set based on variables available on the method stack.
-Metric names cannot be dynamic .. yet (not 100% sure they should be in addition to labels). 
-The way we specify this is using the ${index} syntax followed by the variable index on the stack. Note 
-that we will restrict the stack usage from zero up to the number of method arguments. That is,
+Metric names cannot be dynamic. The way we specify dynamic label values is using the ${index} 
+syntax followed by the method argument index. The special value "$this" can be used for 
+referencing "this.toString()" in non static methods (i.e. where "this." is valid).
+ 
+Note that we restrict the stack usage to the method arguments only. That is,
 we don't allow use of variables created within the method as that is a very fragile thing to do. 
 
 The String representation as given by String.valueOf() of the parameter is used as the label value. 
 That means for primitive types we perform boxing first and null objects will result in the 
-String "null". Note the first variable on the stack is always the reference to "this" which means
-method parameters start at index 1. 
+String "null". Argument indexes start at index 0. 
 
-	@Counted (name = "service_total" labels = { "client:$1" }
+	@Counted (name = "service_total" labels = { "client:$0" }
 	public void callService(String client) 
 
 Each time this method is invoked it will use the value of the "client" parameter as the

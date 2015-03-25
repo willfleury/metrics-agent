@@ -23,8 +23,9 @@ public class TimedExceptionCountedInjector extends AbstractInjector {
     private int startTimeVar;
     private Label startFinally;
     
-    public TimedExceptionCountedInjector(Metric timerMetric, Metric exceptionMetric, AdviceAdapter aa, Type[] argTypes) {
-        super(aa, argTypes);
+    public TimedExceptionCountedInjector(Metric timerMetric, Metric exceptionMetric, AdviceAdapter aa, 
+            Type[] argTypes, int access) {
+        super(aa, argTypes, access);
         this.timerMetric = timerMetric;
         this.exceptionMetric = exceptionMetric;
     }
@@ -45,7 +46,8 @@ public class TimedExceptionCountedInjector extends AbstractInjector {
         aa.visitLabel(endFinally);
         
         injectNameAndLabelToStack(exceptionMetric);
-        aa.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, EXCEPTION_COUNT_METHOD, EXCEPTION_COUNT_SIGNATURE, false);
+        aa.visitMethodInsn(INVOKESTATIC, METRIC_REPORTER_CLASSNAME, EXCEPTION_COUNT_METHOD, 
+                EXCEPTION_COUNT_SIGNATURE, false);
         
         onFinally(ATHROW);
         aa.visitInsn(ATHROW);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.objectweb.asm.Type;
 
 /**
  *
@@ -24,6 +25,18 @@ public class LabelUtil {
         }
         return names;
     }
+    
+    public static int getLabelVarIndex(String value) {
+        return Integer.valueOf(value.substring(1, value.length()));
+    }
+    
+    public static boolean isThis(String value) {
+        return value.startsWith("$this");
+    }
+    
+    public static boolean isTemplatedLabelValue(String value) {
+        return value.startsWith("$");
+    }
 
     public static List<String> getLabelNames(List<String> labels) {
         return new ArrayList<String>(splitLabelNameAndValue(labels).keySet());
@@ -37,28 +50,11 @@ public class LabelUtil {
         return new ArrayList<String>(splitLabelNameAndValue(labels).values());
     }
 
-    public static int getLabelValueVarIndex(String labelValue) {
-        if (!labelValue.matches("\\$[0-9]+")) {
-            throw new IllegalArgumentException("Templated label variable: "
-                    + labelValue + " must match pattern $[0-9]+");
-        }
-
-        return Integer.valueOf(labelValue.substring(1, labelValue.length()));
-    }
-
-    public static void validateLabelValues(String method, List<String> labels, int numParams) {
+    public static void validateLabelValues(String method, List<String> labels, Type[] argTypes) {
         List<String> values = getLabelValues(labels);
 
         for (String value : values) {
-            if (value.startsWith("$")) {
-                int index = getLabelValueVarIndex(value);
-
-                if (index > numParams) { //method params start at 1
-                    throw new IllegalStateException(
-                            String.format("Var index: %d for method %s invalid. "
-                                    + "It has only %d params", index, method, numParams));
-                }
-            }
+            new LabelValidator(method, argTypes).validate(value);
         }
     }
 }

@@ -1,13 +1,14 @@
 package com.fleury.metrics.agent.config;
 
-import com.fleury.metrics.agent.model.Metric;
 import static com.fleury.metrics.agent.model.MetricType.Counted;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+
+import com.fleury.metrics.agent.model.Metric;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 /**
  *

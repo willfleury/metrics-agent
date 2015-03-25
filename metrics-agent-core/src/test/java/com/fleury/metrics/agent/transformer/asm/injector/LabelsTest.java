@@ -1,7 +1,8 @@
 package com.fleury.metrics.agent.transformer.asm.injector;
 
-import com.fleury.metrics.agent.annotation.Counted;
 import static org.junit.Assert.assertEquals;
+
+import com.fleury.metrics.agent.annotation.Counted;
 import org.junit.Test;
 
 /**
@@ -30,14 +31,24 @@ public class LabelsTest extends BaseMetricTest {
         testInvocationWithArgs(CountedConstructorWithDynamicStringLabelValueClass.class,
                 new Object[]{"hello"}, new String[]{"hello"});
     }
+    
+    @Test
+    public void shouldCountMethodInvocationWithDynamicValueThis() throws Exception {
+        testMethodInvocation(CountedMethodWithDynamicLabelValueThisClass.class, new String[]{"hello"});
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWithInvalueDynamicLabelValueThisInConstructor() throws Exception {
+        testInvocation(CountedConstructorWithDynamicLabelValueThisClass.class, new String[]{"hello"});
+    }
 
     @Test
     public void shouldCountConstructorInvocationWithDynamicLongValue() throws Exception {
         testInvocationWithArgs(CountedConstructorWithDynamicLongLabelValueClass.class,
-                new Object[]{5}, new String[]{"5"});
+                new Object[]{0, 5}, new String[]{"5"});
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenInvalidParamIndexLabelValue() throws Exception {
         testInvocationWithArgs(CountedConstructorWithInvalidParamIndexLabelValueClass.class,
                 new Object[]{5}, new String[]{"5"});
@@ -64,6 +75,15 @@ public class LabelsTest extends BaseMetricTest {
 
         assertEquals(1, metrics.getCount("constructor", labelValues));
     }
+    
+    private void testMethodInvocation(Class instrumentClazz, String[] labelValues) throws Exception {
+        Class<?> clazz = execute(instrumentClazz);
+        Object obj = clazz.newInstance();
+
+        obj.getClass().getMethod("method").invoke(obj);
+        
+        assertEquals(1, metrics.getCount("method", labelValues));
+    }
 
     public static class CountedConstructorWithLabelsClass {
 
@@ -88,10 +108,33 @@ public class LabelsTest extends BaseMetricTest {
             BaseMetricTest.performBasicTask();
         }
     }
+    
+    public static class CountedConstructorWithDynamicLabelValueThisClass {
+        @Counted(name = "constructor", labels = {"name1:$this"})
+        public CountedConstructorWithDynamicLabelValueThisClass() {
+            BaseMetricTest.performBasicTask();
+        }
+    }
+    
+     public static class CountedMethodWithDynamicLabelValueThisClass {
+        
+        public CountedMethodWithDynamicLabelValueThisClass() {
+        }
+        
+         @Counted(name = "method", labels = {"name1:$this"})
+        public void method() {
+            BaseMetricTest.performBasicTask();
+        }
+        
+        @Override
+        public String toString() {
+            return "hello";
+        }
+    }
 
     public static class CountedConstructorWithDynamicStringLabelValueClass {
 
-        @Counted(name = "constructor", labels = {"name1:$1"})
+        @Counted(name = "constructor", labels = {"name1:$0"})
         public CountedConstructorWithDynamicStringLabelValueClass(String value) {
             BaseMetricTest.performBasicTask();
         }
@@ -100,7 +143,7 @@ public class LabelsTest extends BaseMetricTest {
     public static class CountedConstructorWithDynamicLongLabelValueClass {
 
         @Counted(name = "constructor", labels = {"name1:$1"})
-        public CountedConstructorWithDynamicLongLabelValueClass(long value) {
+        public CountedConstructorWithDynamicLongLabelValueClass(long rand, long value) {
             BaseMetricTest.performBasicTask();
         }
     }

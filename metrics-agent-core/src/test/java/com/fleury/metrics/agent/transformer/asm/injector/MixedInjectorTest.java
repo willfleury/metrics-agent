@@ -1,12 +1,13 @@
 package com.fleury.metrics.agent.transformer.asm.injector;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fleury.metrics.agent.annotation.Counted;
 import com.fleury.metrics.agent.annotation.ExceptionCounted;
 import com.fleury.metrics.agent.annotation.Timed;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**

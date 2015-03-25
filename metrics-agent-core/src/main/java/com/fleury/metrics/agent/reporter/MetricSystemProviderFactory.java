@@ -22,7 +22,7 @@ public class MetricSystemProviderFactory {
         this.provider = initialiseMetricSystem();
     }
     
-    public void setMetricSystemConfiguration(Map<String, String> configuration) {
+    public void init(Map<String, String> configuration) {
         this.configuration = configuration;
     }
 

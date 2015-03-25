@@ -1,5 +1,9 @@
 package com.fleury.metrics.agent.transformer.asm.injectors;
 
+import static com.fleury.metrics.agent.model.LabelUtil.getLabelVarIndex;
+import static com.fleury.metrics.agent.model.LabelUtil.isTemplatedLabelValue;
+import static com.fleury.metrics.agent.model.LabelUtil.isThis;
+
 import com.fleury.metrics.agent.model.LabelUtil;
 import com.fleury.metrics.agent.model.Metric;
 import com.fleury.metrics.agent.reporter.Reporter;
@@ -19,10 +23,12 @@ public abstract class AbstractInjector implements Injector, Opcodes {
 
     protected final AdviceAdapter aa;
     protected final Type[] argTypes;
+    protected final int access;
 
-    public AbstractInjector(AdviceAdapter aa, Type[] argTypes) {
+    public AbstractInjector(AdviceAdapter aa, Type[] argTypes, int access) {
         this.aa = aa;
         this.argTypes = argTypes;
+        this.access = access;
     }
 
     @Override
@@ -77,54 +83,49 @@ public abstract class AbstractInjector implements Injector, Opcodes {
     }
 
     private void injectLabelValueToStack(String labelValue) {
-        if (!labelValue.startsWith("$")) {
+        if (!isTemplatedLabelValue(labelValue)) {
             aa.visitLdcInsn(labelValue);
         } 
         else {
-            int var = LabelUtil.getLabelValueVarIndex(labelValue);
+            if (isThis(labelValue)) {
+                aa.visitVarInsn(ALOAD, 0); //aa.loadThis();
+            }
+            
+            else {
+                int argIndex = getLabelVarIndex(labelValue);
 
-            pushMethodParameterValueAsString(argTypes[var - 1], var);
+                boxParameterAndLoad(argIndex);
+            }
+            
             aa.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf",
-                    "(Ljava/lang/Object;)Ljava/lang/String;", false);
+                        "(Ljava/lang/Object;)Ljava/lang/String;", false);
         }
-
+       
         aa.visitInsn(AASTORE);
     }
 
-    private void pushMethodParameterValueAsString(Type type, int var) {
-        if (type.equals(Type.BOOLEAN_TYPE)) {
-            aa.visitVarInsn(ILOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false);
-        } 
-        else if (type.equals(Type.BYTE_TYPE)) {
-            aa.visitVarInsn(ILOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false);
-        } 
-        else if (type.equals(Type.CHAR_TYPE)) {
-            aa.visitVarInsn(ILOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false);
-        } else if (type.equals(Type.SHORT_TYPE)) {
-            aa.visitVarInsn(ILOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false);
-        } 
-        else if (type.equals(Type.INT_TYPE)) {
-            aa.visitVarInsn(ILOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-        } 
-        else if (type.equals(Type.LONG_TYPE)) {
-            aa.visitVarInsn(LLOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
-        } 
-        else if (type.equals(Type.FLOAT_TYPE)) {
-            aa.visitVarInsn(FLOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
-        } 
-        else if (type.equals(Type.DOUBLE_TYPE)) {
-            aa.visitVarInsn(DLOAD, var);
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
-        } 
-        else {
-            aa.visitVarInsn(ALOAD, var);
+    private void boxParameterAndLoad(int argIndex) {
+        Type type = argTypes[argIndex];
+        int stackIndex = getStackIndex(argIndex);
+        
+        switch (type.getSort()) {
+            case Type.OBJECT: //no need to box Object
+                aa.visitVarInsn(ALOAD, stackIndex);  
+                break;
+                
+            default:
+                // aa.loadArg(argIndex); //doesn't work...
+                aa.visitVarInsn(type.getOpcode(Opcodes.ILOAD), stackIndex);
+                aa.valueOf(type);
+                break;
         }
+    }
+    
+    private int getStackIndex(int arg) {
+        int index = (access & Opcodes.ACC_STATIC) == 0 ? 1 : 0;
+        for (int i = 0; i < arg; i++) {
+            index += argTypes[i].getSize();
+        }
+        return index;
     }
 }

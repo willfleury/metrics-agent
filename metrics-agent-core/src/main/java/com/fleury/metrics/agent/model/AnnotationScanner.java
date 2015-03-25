@@ -4,6 +4,7 @@ import static com.fleury.metrics.agent.model.MetricType.Counted;
 import static com.fleury.metrics.agent.model.MetricType.ExceptionCounted;
 import static com.fleury.metrics.agent.model.MetricType.Gauged;
 import static com.fleury.metrics.agent.model.MetricType.Timed;
+
 import java.util.Map;
 
 /**
