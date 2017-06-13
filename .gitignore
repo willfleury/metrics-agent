@@ -6,3 +6,5 @@ nbactions.xml
 nb-configuration.xml
 target/
 dependency-reduced-pom.xml
+.idea/
+*.iml

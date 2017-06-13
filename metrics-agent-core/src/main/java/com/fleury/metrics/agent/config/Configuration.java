@@ -10,20 +10,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fleury.metrics.agent.model.Metric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
  * @author Will Fleury
  */
 public class Configuration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
     private final static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory()) {
         {
@@ -39,7 +46,8 @@ public class Configuration {
     
     @JsonProperty("system")
     private Map<String, String> metricSystemConfiguration;
-    
+
+    private Set<String> whiteList;
 
     public Configuration() {
         this(new HashMap<Key, List<Metric>>());
@@ -68,7 +76,11 @@ public class Configuration {
         }
 
         try {
-            return createConfig(new FileInputStream(filename));
+            LOGGER.debug("Found config file: {}", filename);
+            Configuration configuration = createConfig(new FileInputStream(filename));
+            configuration.setWhiteList(configuration.createWhiteList());
+            LOGGER.debug("Created config: {}", configuration);
+            return configuration;
         }
         catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -82,6 +94,33 @@ public class Configuration {
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Set<String> createWhiteList() {
+        Set<String> result = new HashSet<String>();
+
+        for (Key key : metrics.keySet()) {
+            result.add(key.getClassName());
+        }
+
+        return result;
+    }
+
+    public boolean inWhiteList(String className) {
+        return whiteList.contains(className);
+    }
+
+    public void setWhiteList(Set<String> whiteList) {
+        this.whiteList = whiteList;
+    }
+
+    @Override
+    public String toString() {
+        return "Configuration{" +
+                "metrics=" + metrics +
+                ", metricSystemConfiguration=" + metricSystemConfiguration +
+                ", whiteList=" + whiteList +
+                '}';
     }
 
     public static class Key {
@@ -126,6 +165,14 @@ public class Configuration {
                 return false;
             }
             return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                    "className='" + className + '\'' +
+                    ", method='" + method + '\'' +
+                    '}';
         }
     }
 
