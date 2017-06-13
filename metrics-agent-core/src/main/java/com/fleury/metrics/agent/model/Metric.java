@@ -62,4 +62,15 @@ public class Metric {
     public void setExt(Map<String, String> ext) {
         this.ext = ext;
     }
+
+    @Override
+    public String toString() {
+        return "Metric{" +
+                "type=" + type +
+                ", name='" + name + '\'' +
+                ", doc='" + doc + '\'' +
+                ", labels=" + labels +
+                ", ext=" + ext +
+                '}';
+    }
 }
