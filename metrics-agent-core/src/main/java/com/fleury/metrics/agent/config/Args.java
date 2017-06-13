@@ -17,6 +17,6 @@ public class Args {
             return System.getProperty("agent-config");
         }
 
-        return agentArgs.split(":")[1];
+        return agentArgs.substring(agentArgs.indexOf(':') + 1);
     }
 }
