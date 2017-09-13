@@ -32,6 +32,10 @@ public class Configuration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
+    public static String convertConfigClassNameToInternal(String name) {
+        return name.replaceAll("\\.", "/");
+    }
+
     private final static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory()) {
         {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -182,7 +186,7 @@ public class Configuration {
         public Object deserializeKey(final String key,
                 final DeserializationContext ctxt)
                 throws IOException, JsonProcessingException {
-            String className = key.substring(0, key.lastIndexOf("."));
+            String className = convertConfigClassNameToInternal(key.substring(0, key.lastIndexOf(".")));
             String methodName = key.substring(key.lastIndexOf(".") + 1, key.length());
 
             return new Key(className, methodName);

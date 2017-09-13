@@ -351,7 +351,7 @@ Using the configuration file config.yaml is performed as follows
 
 Note if you want to debug the metrics agent you should put the debugger agent first.
 
-	-agentlib:jdwp=transport=dt_socket,server=n,address=localhost -javaagent:metric-agent-dist.jar myapp.jar
+	-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=<port> -javaagent:metric-agent-dist.jar myapp.jar
 
 
 # TODO

@@ -23,7 +23,7 @@ public class ConfigurationTest {
 
         assertTrue(!config.getMetrics().isEmpty());
 
-        List<Metric> metrics = config.findMetrics("com.fleury.sample.Engine", "sampleMethod(I)J");
+        List<Metric> metrics = config.findMetrics("com/fleury/sample/Engine", "sampleMethod(I)J");
         assertEquals(2, metrics.size());
 
         Metric metric = metrics.get(0);

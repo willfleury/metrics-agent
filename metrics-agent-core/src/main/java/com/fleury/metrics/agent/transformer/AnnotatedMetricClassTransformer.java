@@ -28,7 +28,7 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
             ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
         if (config.inWhiteList(className)) {
-            LOGGER.debug("Class found in the white list: " + className);
+            LOGGER.debug("Transforming class: {}", className);
             ClassReader cr = new ClassReader(classfileBuffer);
             ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 

@@ -97,7 +97,12 @@ public class TestMetricSystem implements MetricSystem {
         List<Long> value = registry.get(name);
         if (value == null) {
             value = new ArrayList<Long>();
-            final List<Long> existing = registry.putIfAbsent(name, value);
+
+            List<Long> existing = registry.get(name);
+            if (existing == null) {
+                existing = registry.put(name, value);
+            }
+
             if (existing != null) {
                 throw new IllegalArgumentException("A metric named " + name + " already exists");
             }
@@ -110,7 +115,12 @@ public class TestMetricSystem implements MetricSystem {
         AtomicLong value = registry.get(name);
         if (value == null) {
             value = new AtomicLong();
-            final AtomicLong existing = registry.putIfAbsent(name, value);
+
+            AtomicLong existing = registry.get(name);
+            if (existing == null) {
+                existing = registry.put(name, value);
+            }
+
             if (existing != null) {
                 throw new IllegalArgumentException("A metric named " + name + " already exists");
             }
