@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.fleury</groupId>
         <artifactId>metrics-agent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
     <artifactId>metrics-agent-codahale</artifactId>
     <name>metrics-agent-codahale</name>
