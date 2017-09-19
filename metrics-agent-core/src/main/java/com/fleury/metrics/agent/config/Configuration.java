@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -51,8 +50,6 @@ public class Configuration {
 
     @JsonProperty("system")
     private Map<String, String> metricSystemConfiguration;
-
-    private Set<String> whiteList;
 
     public Configuration() {
         this(new HashMap<Key, List<Metric>>());
@@ -105,7 +102,6 @@ public class Configuration {
         return "Configuration{" +
                 "metrics=" + metrics +
                 ", metricSystemConfiguration=" + metricSystemConfiguration +
-                ", whiteList=" + whiteList +
                 '}';
     }
 

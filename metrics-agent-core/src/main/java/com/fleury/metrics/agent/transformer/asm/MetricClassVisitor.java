@@ -41,9 +41,7 @@ public class MetricClassVisitor extends ClassVisitor {
         if (!isInterface && mv != null) {
             List<Metric> metadata = config.findMetrics(className, name + desc);
             mv = new MetricAdapter(mv, access, name, desc, metadata);
-            //TODO figure out.. Should only do this with old classes - same with frames only for 1.7+..
-            // Only the JDK 1.5 and earlier compiler uses JSR and RET, so compiling for JDK 1.6 should be a workaround.
-            //classversion is given above!
+            //it would be better to only selectively use the JSRInliner but need to work out how
             mv = new JSRInlinerAdapter(mv, access, name, desc, signature, exceptions);
         }
 
