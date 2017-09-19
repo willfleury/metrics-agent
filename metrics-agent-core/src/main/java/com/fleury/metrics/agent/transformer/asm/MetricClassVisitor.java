@@ -18,6 +18,7 @@ public class MetricClassVisitor extends ClassVisitor {
 
     private boolean isInterface;
     private String className;
+    private int classVersion;
     private Configuration config;
 
     public MetricClassVisitor(ClassVisitor cv, Configuration config) {
@@ -28,6 +29,7 @@ public class MetricClassVisitor extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         cv.visit(version, access, name, signature, superName, interfaces);
+        this.classVersion = version;
         this.className = name;
         this.isInterface = (access & ACC_INTERFACE) != 0;
     }
@@ -38,7 +40,11 @@ public class MetricClassVisitor extends ClassVisitor {
 
         if (!isInterface && mv != null) {
             List<Metric> metadata = config.findMetrics(className, name + desc);
-            mv = new JSRInlinerAdapter(new MetricAdapter(mv, access, name, desc, metadata), access, name, desc, signature, exceptions);
+            mv = new MetricAdapter(mv, access, name, desc, metadata);
+            //TODO figure out.. Should only do this with old classes - same with frames only for 1.7+..
+            // Only the JDK 1.5 and earlier compiler uses JSR and RET, so compiling for JDK 1.6 should be a workaround.
+            //classversion is given above!
+            mv = new JSRInlinerAdapter(mv, access, name, desc, signature, exceptions);
         }
 
         return mv;

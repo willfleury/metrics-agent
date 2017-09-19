@@ -44,7 +44,7 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
 
             return cw.toByteArray();
         } catch (RuntimeException e) {
-            LOGGER.log(WARNING, "Unhandled exception", e);
+            LOGGER.log(WARNING, "Failed to transform " + className, e);
         }
 
         return classfileBuffer;
