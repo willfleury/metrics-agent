@@ -293,8 +293,6 @@ on metric operations. To put this into context; if you are instrumenting a reque
 request duration is 1 millisecond, then the effect of the lookup is an additional overhead of 0.000001%. If however
 this is a performance sensitive method which has a typical invocation duration in the nanoseconds then hand crafted
 metrics should be considered. Similarly if there are many hash collisions this lookup will become slower.
-We are investigating using a faster lookup data structure like [Koloboke](https://github.com/OpenHFT/Koloboke) 
-which appear to reduce the average lookup time by about 50% (5 nanosecond region) by utilising more memory.
 
 On basic counters, this is noticable but on other metric types it becomes less observable.
 We did notice however that when using labels with Prometheus counters there is a significant overhead introduced 
@@ -317,8 +315,6 @@ Very lightweight.
 	
 	asm
 	jackson
-	slf4j
-	log4j
 
 The client libraries for whatever metric provider you choose are also included. 
 Note that the final agent binaries are shaded and all dependencies relocated to prevent possible conflicts.
@@ -363,8 +359,8 @@ include that dependency.
 Allow specifying counted or gauged to be invoked at either method start or method end (currently
 only method start).
 
-Make reporting capabilities pluggable for codahale (shading issue?).
-
 Ability to capture the local variables of methods frame stack when an exception occurs and
 record / report to some external sink for debugging (e.g. encrypted file or server). However,
 this may branch into another project as it isn't monitoring, rather debugging!
+
+Implement black list support for classes we want to ignore completely for whatever reason.
