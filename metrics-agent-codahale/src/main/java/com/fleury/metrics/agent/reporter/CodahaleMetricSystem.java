@@ -4,8 +4,7 @@ import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 /**
  *
@@ -13,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CodahaleMetricSystem implements MetricSystem {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(CodahaleMetricSystem.class);
+    private static final Logger LOGGER = Logger.getLogger(CodahaleMetricSystem.class.getName());
 
     private final MetricRegistry registry = new MetricRegistry();
     private final Map<String, String> configuration;
@@ -82,7 +81,7 @@ public class CodahaleMetricSystem implements MetricSystem {
     }
 
     private void startJmxReporter() {
-        LOGGER.debug("Starting JMX reporter");
+        LOGGER.fine("Starting JMX reporter");
 
         JmxReporter
                 .forRegistry(registry)
