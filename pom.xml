@@ -7,34 +7,35 @@
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- we want this to work with 1.6 compile code -->
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
-		
-		<dropwizard.metrics>3.1.0</dropwizard.metrics>
-		<asm.version>5.0.3</asm.version>
-		<slf4j.version>1.7.7</slf4j.version>
-		<prometheus.version>0.0.6</prometheus.version>
-		<jackson.version>2.4.0</jackson.version>
-		
-		<log4j.version>1.7.10</log4j.version>
-		<junit.version>4.11</junit.version>
+
+        <agent.artifact.name>metrics-agent</agent.artifact.name>
+
+        <dropwizard.metrics>3.1.0</dropwizard.metrics>
+        <asm.version>5.1</asm.version>
+        <prometheus.version>0.0.6</prometheus.version>
+        <jackson.version>2.4.0</jackson.version>
+
+        <junit.version>4.11</junit.version>
     </properties>
-	
-	
-	<modules>
-		<module>metrics-agent-core</module>
-		<module>metrics-agent-annotation</module>
-		<module>metrics-agent-codahale</module>
-		<module>metrics-agent-prometheus</module>
-		<module>metrics-agent-dist</module>
-	</modules>
-	
-	<dependencies>		
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+
+
+    <modules>
+        <module>metrics-agent-core</module>
+        <module>metrics-agent-annotation</module>
+        <module>metrics-agent-codahale</module>
+        <module>metrics-agent-prometheus</module>
+        <module>metrics-agent-dist</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

@@ -5,9 +5,10 @@ import com.fleury.metrics.agent.model.Metric;
 import java.util.List;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.commons.JSRInlinerAdapter;
 
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 /**
  *
@@ -17,10 +18,10 @@ public class MetricClassVisitor extends ClassVisitor {
 
     private boolean isInterface;
     private String className;
-    private final Configuration config;
+    private Configuration config;
 
-    public MetricClassVisitor(Configuration config, ClassVisitor cv) {
-        super(Opcodes.ASM5, cv);
+    public MetricClassVisitor(ClassVisitor cv, Configuration config) {
+        super(ASM5, cv);
         this.config = config;
     }
 
@@ -37,7 +38,7 @@ public class MetricClassVisitor extends ClassVisitor {
 
         if (!isInterface && mv != null) {
             List<Metric> metadata = config.findMetrics(className, name + desc);
-            mv = new MetricAdapter(metadata, mv, access, name, desc);
+            mv = new JSRInlinerAdapter(new MetricAdapter(mv, access, name, desc, metadata), access, name, desc, signature, exceptions);
         }
 
         return mv;

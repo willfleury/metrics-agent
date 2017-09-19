@@ -7,20 +7,27 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>metrics-agent-codahale</artifactId>
-	<name>metrics-agent-codahale</name>
+    <name>metrics-agent-codahale</name>
     <packaging>jar</packaging>
-	
-	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>metrics-agent-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-core</artifactId>
-			<version>${dropwizard.metrics}</version>
-		</dependency>
-	</dependencies>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>metrics-agent-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>${dropwizard.metrics}</version>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>dev-experts</id>
+            <url>https://dl.bintray.com/devexperts/Maven/</url>
+        </repository>
+    </repositories>
 </project>

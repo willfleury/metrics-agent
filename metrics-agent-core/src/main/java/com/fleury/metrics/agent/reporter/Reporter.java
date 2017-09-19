@@ -1,11 +1,12 @@
 package com.fleury.metrics.agent.reporter;
 
+import static java.util.logging.Level.FINER;
+
 import com.fleury.metrics.agent.model.LabelUtil;
 import com.fleury.metrics.agent.model.Metric;
 import java.util.Collection;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 /**
  *
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Reporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Reporter.class);
+    private static final Logger LOGGER = Logger.getLogger(Reporter.class.getName());
 
     public static final MetricSystem METRIC_SYSTEM = MetricSystemProviderFactory.INSTANCE.createMetricSystem();
 
@@ -40,17 +41,17 @@ public class Reporter {
     }
 
     public static void registerCounter(String name, String[] labelNames, String doc) {
-        LOGGER.trace("registering metric name: {} doc: {}", name, doc);
+        LOGGER.log(FINER, "registering metric name: {} doc: {}", new Object[] {name, doc});
         METRIC_SYSTEM.registerCounter(name, labelNames, doc);
     }
 
     public static void registerGauge(String name, String[] labelNames, String doc) {
-        LOGGER.trace("registering metric name: {} doc: {}", name, doc);
+        LOGGER.log(FINER, "registering metric name: {} doc: {}", new Object[] {name, doc});
         METRIC_SYSTEM.registerGauge(name, labelNames, doc);
     }
 
     public static void registerTimer(String name, String[] labelNames, String doc) {
-        LOGGER.trace("registering metric name: {} doc: {}", name, doc);
+        LOGGER.log(FINER, "registering metric name: {} doc: {}", new Object[] {name, doc});
         METRIC_SYSTEM.registerTimer(name, labelNames, doc);
     }
 

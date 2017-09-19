@@ -1,5 +1,7 @@
 package com.fleury.metrics.agent.config;
 
+import static java.util.logging.Level.FINE;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,8 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fleury.metrics.agent.model.Metric;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,10 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,7 +31,7 @@ import java.util.Set;
  */
 public class Configuration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
+    private static final Logger LOGGER = Logger.getLogger(Configuration.class.getName());
 
     public static String convertConfigClassNameToInternal(String name) {
         return name.replaceAll("\\.", "/");
@@ -47,7 +48,7 @@ public class Configuration {
 
     @JsonProperty("metrics")
     private Map<Key, List<Metric>> metrics;
-    
+
     @JsonProperty("system")
     private Map<String, String> metricSystemConfiguration;
 
@@ -80,10 +81,9 @@ public class Configuration {
         }
 
         try {
-            LOGGER.debug("Found config file: {}", filename);
+            LOGGER.log(FINE, "Found config file: {0}", filename);
             Configuration configuration = createConfig(new FileInputStream(filename));
-            configuration.setWhiteList(configuration.createWhiteList());
-            LOGGER.debug("Created config: {}", configuration);
+            LOGGER.log(FINE, "Created config: {0}", configuration);
             return configuration;
         }
         catch (FileNotFoundException e) {
@@ -98,24 +98,6 @@ public class Configuration {
         catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private Set<String> createWhiteList() {
-        Set<String> result = new HashSet<String>();
-
-        for (Key key : metrics.keySet()) {
-            result.add(key.getClassName());
-        }
-
-        return result;
-    }
-
-    public boolean inWhiteList(String className) {
-        return whiteList.contains(className);
-    }
-
-    public void setWhiteList(Set<String> whiteList) {
-        this.whiteList = whiteList;
     }
 
     @Override
