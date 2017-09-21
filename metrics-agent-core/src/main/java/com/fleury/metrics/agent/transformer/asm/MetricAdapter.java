@@ -12,11 +12,14 @@ import com.fleury.metrics.agent.transformer.asm.injectors.InjectorFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
+
 /**
  *
  * @author Will Fleury
@@ -25,17 +28,23 @@ public class MetricAdapter extends AdviceAdapter {
 
     private static final Logger LOGGER = Logger.getLogger(AdviceAdapter.class.getName());
 
+    //all classes that are modified will be registered in this cache so we can determine
+    //if later in processing if it was touched & transformed
+    public static final Set<String> MODIFIED_CLASS_CACHE = new CopyOnWriteArraySet<String>();
+
     private final Map<MetricType, Metric> metrics = new HashMap<MetricType, Metric>();
     private final AnnotationScanner annotationScanner;
     private final Type[] argTypes;
+    private final String className;
     private final String methodName;
     private final int access;
     
     private List<Injector> injectors;
 
-    public MetricAdapter(MethodVisitor mv, int access, String name, String desc, List<Metric> metadata) {
+    public MetricAdapter(MethodVisitor mv, String className, int access, String name, String desc, List<Metric> metadata) {
         super(ASM5, mv, access, name, desc);
 
+        this.className = className;
         this.methodName = name;
         this.argTypes = Type.getArgumentTypes(desc);
         this.access = access;
@@ -45,6 +54,10 @@ public class MetricAdapter extends AdviceAdapter {
     }
 
     private void registerConfigurationMetrics(List<Metric> configMetrics) {
+        if (configMetrics.size() > 0) {
+            MODIFIED_CLASS_CACHE.add(className);
+        }
+
         for (Metric metric : configMetrics) {
             metrics.put(metric.getType(), metric);
         }
@@ -54,6 +67,7 @@ public class MetricAdapter extends AdviceAdapter {
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         Metric metatdata = annotationScanner.checkSignature(desc);
         if (metatdata != null) {
+            MODIFIED_CLASS_CACHE.add(className);
             return new MetricAnnotationAttributeVisitor(super.visitAnnotation(desc, visible), metatdata);
         }
 
@@ -65,6 +79,7 @@ public class MetricAdapter extends AdviceAdapter {
         if (!metrics.isEmpty()) {
             LOGGER.log(FINE, "Metrics found on : {0}", methodName);
         }
+
         injectors = InjectorFactory.createInjectors(metrics, this, argTypes, access);
         validateLabels();
         Reporter.registerMetrics(metrics.values());

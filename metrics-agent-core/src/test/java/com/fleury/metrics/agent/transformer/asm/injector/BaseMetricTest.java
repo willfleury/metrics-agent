@@ -5,12 +5,13 @@ import static com.fleury.metrics.agent.config.Configuration.convertConfigClassNa
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.reporter.TestMetricSystem;
-import com.fleury.metrics.agent.transformer.asm.MetricClassVisitor;
+import com.fleury.metrics.agent.transformer.AnnotatedMetricClassTransformer;
 import java.io.PrintWriter;
+import java.lang.instrument.ClassFileTransformer;
 import java.util.logging.Logger;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
@@ -43,18 +44,21 @@ public abstract class BaseMetricTest {
     }
 
     protected <T> Class<T> execute(Class<T> clazz, Configuration config) throws Exception {
-        String className = clazz.getName();
-        String classAsPath = convertConfigClassNameToInternal(className) + ".class";
+        String className = convertConfigClassNameToInternal(clazz.getName());
+        String classAsPath = className + ".class";
 
-        ClassReader cr = new ClassReader(clazz.getClassLoader().getResourceAsStream(classAsPath));
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        ClassVisitor cv = new MetricClassVisitor(cw, config);
-        cr.accept(cv, ClassReader.EXPAND_FRAMES);
+        ClassFileTransformer cft = new AnnotatedMetricClassTransformer(config, true);
+        byte[] classfileBuffer = cft.transform(
+                clazz.getClassLoader(),
+                className,
+                null,
+                null,
+                IOUtils.toByteArray(clazz.getClassLoader().getResourceAsStream(classAsPath)));
 
-        traceBytecode(cw.toByteArray());
-        verifyBytecode(cw.toByteArray());
+        traceBytecode(classfileBuffer);
+        verifyBytecode(classfileBuffer);
 
-        return getClassFromBytes(clazz, cw.toByteArray());
+        return getClassFromBytes(clazz, classfileBuffer);
     }
     
     private void traceBytecode(byte[] bytecode) {

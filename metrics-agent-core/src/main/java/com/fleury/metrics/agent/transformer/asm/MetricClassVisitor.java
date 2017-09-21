@@ -40,8 +40,8 @@ public class MetricClassVisitor extends ClassVisitor {
 
         if (!isInterface && mv != null) {
             List<Metric> metadata = config.findMetrics(className, name + desc);
-            mv = new MetricAdapter(mv, access, name, desc, metadata);
-            //it would be better to only selectively use the JSRInliner but need to work out how
+
+            mv = new MetricAdapter(mv, className, access, name, desc, metadata);
             mv = new JSRInlinerAdapter(mv, access, name, desc, signature, exceptions);
         }
 

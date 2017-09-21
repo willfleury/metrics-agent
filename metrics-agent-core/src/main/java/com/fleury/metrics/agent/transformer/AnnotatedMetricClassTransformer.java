@@ -7,6 +7,7 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.transformer.asm.ASMClassWriter;
+import com.fleury.metrics.agent.transformer.asm.MetricAdapter;
 import com.fleury.metrics.agent.transformer.asm.MetricClassVisitor;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -25,9 +26,15 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
     private static final Logger LOGGER = Logger.getLogger(AnnotatedMetricClassTransformer.class.getName());
 
     private final Configuration config;
+    private final boolean propagateExceptions;
 
     public AnnotatedMetricClassTransformer(Configuration config) {
+        this(config, false);
+    }
+
+    public AnnotatedMetricClassTransformer(Configuration config, boolean propagateExceptions) {
         this.config = config;
+        this.propagateExceptions = propagateExceptions;
     }
 
     @Override
@@ -42,9 +49,19 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
 
             cr.accept(cv, EXPAND_FRAMES);
 
-            return cw.toByteArray();
+            //only modify what we have to - return original class definition if we don't change
+            if (MetricAdapter.MODIFIED_CLASS_CACHE.contains(className)) {
+                return cw.toByteArray();
+            }
+
+            return classfileBuffer;
         } catch (RuntimeException e) {
-            LOGGER.log(WARNING, "Failed to transform " + className, e);
+            if (propagateExceptions) {
+                throw e; //useful for testing & fail fast setups
+            }
+            else {
+                LOGGER.log(WARNING, "Failed to transform " + className, e);
+            }
         }
 
         return classfileBuffer;

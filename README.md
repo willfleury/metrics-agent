@@ -191,7 +191,9 @@ Note the method signature is based on the method parameter types and return type
 parameter types are between the brackets `()` with the return type after. In this case
 we have no parameters and the return type is void which results in `()V`. [Here](http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html) is a good overview of Java method signature mappings.
 
-
+### What we actually Transform
+As we allow the use of annotations to register metrics to track, we must scan all classes as they are loaded and check for the annotations. However, we do not want to 
+have to rewrite all of these classes if we have not changed anything. There are many reasons you want to modify as little as possible with an agent but the general motto is, only touch what you have to. Hence, we only rewrite classes which have been changed due to the addition of metrics and all other classes, even though scanned, are returned untouched to the classloader.
 
 ## Supported Metrics Systems
 
