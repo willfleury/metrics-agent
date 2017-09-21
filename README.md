@@ -222,6 +222,8 @@ The metric systems configuration is passed as simple key-value pairs `(Map<Strin
     system:
         key1: value1
 
+j.u.l is used for logging and can be configured by passing the agent argument `log-config:<properties path>` to the agent with the path to the logger properties file. 
+
 
 ## Performance
 We use the Java ASM bytecode manipulation library. This is the lowest level and fastest of all the bytecode libraries which is used by the likes of cglib. It allows us to inject bytecode in a precise way which means we can craft the exact same bytecode as if it was hand written. 
@@ -269,6 +271,11 @@ Example
 Using the configuration file config.yaml is performed as follows
 
 	java -javaagent:metrics-agent.jar=agent-config:agent.yaml -jar myapp.jar 
+
+
+Using the configuration file config.yaml and logging configuration logger.properties is performed as follows
+
+	java -javaagent:metrics-agent.jar=agent-config:agent.yaml,log-config:logger.properties -jar myapp.jar 
 
 
 # Debugging

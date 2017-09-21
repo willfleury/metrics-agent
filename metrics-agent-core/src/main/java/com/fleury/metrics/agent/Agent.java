@@ -1,6 +1,6 @@
 package com.fleury.metrics.agent;
 
-import com.fleury.metrics.agent.config.Args;
+import com.fleury.metrics.agent.config.ArgParser;
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.reporter.MetricSystemProviderFactory;
 import com.fleury.metrics.agent.transformer.AnnotatedMetricClassTransformer;
@@ -15,9 +15,11 @@ public class Agent {
 
     public static void premain(String args, Instrumentation instrumentation) {
 
-        initializeLogging();
+        ArgParser argParser = new ArgParser(args);
 
-        Configuration config = Configuration.createConfig(new Args(args).getConfigFilename());
+        initializeLogging(argParser.getLogConfigFilename());
+
+        Configuration config = Configuration.createConfig(argParser.getConfigFilename());
         MetricSystemProviderFactory.INSTANCE.init(config.getMetricSystemConfiguration());
 
         instrumentation.addTransformer(
@@ -25,12 +27,12 @@ public class Agent {
                 instrumentation.isRetransformClassesSupported());
     }
 
-    private static void initializeLogging() {
-        //TODO allow override of logging configuration file from agent args
+    private static void initializeLogging(String resource) {
         try {
-            LogManager.getLogManager().readConfiguration(Agent.class.getResourceAsStream("/logging.properties"));
+            LogManager.getLogManager().readConfiguration(
+                    Agent.class.getResourceAsStream(resource));
         } catch (Exception e) {
-            System.err.println("Unable to initialize agent logging");
+            throw new RuntimeException("Unable to initialize agent logging with config: " + resource);
         }
     }
 }
