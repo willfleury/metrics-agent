@@ -288,13 +288,3 @@ Note if you want to debug the metrics agent you should put the debugger agent fi
 
 	-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=<port> -javaagent:metrics-agent.jar myapp.jar
 
-
-# TODO
-
-Produce configuration for common use cases like Jetty server metrics. Each configurationshould be held in its own module and a build profile added to metrics-agent-dist to include that dependency.
-
-Allow specifying counted or gauged to be invoked at either method start or method end (currently only method start).
-
-Ability to capture the local variables of methods frame stack when an exception occurs and record / report to some external sink for debugging (e.g. encrypted file or server). However, this may branch into another project as it isn't monitoring, rather debugging!
-
-Implement black list support for classes we want to ignore completely for whatever reason.
