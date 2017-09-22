@@ -54,10 +54,6 @@ public class MetricAdapter extends AdviceAdapter {
     }
 
     private void registerConfigurationMetrics(List<Metric> configMetrics) {
-        if (configMetrics.size() > 0) {
-            MODIFIED_CLASS_CACHE.add(className);
-        }
-
         for (Metric metric : configMetrics) {
             metrics.put(metric.getType(), metric);
         }
@@ -67,7 +63,6 @@ public class MetricAdapter extends AdviceAdapter {
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         Metric metatdata = annotationScanner.checkSignature(desc);
         if (metatdata != null) {
-            MODIFIED_CLASS_CACHE.add(className);
             return new MetricAnnotationAttributeVisitor(super.visitAnnotation(desc, visible), metatdata);
         }
 
@@ -76,7 +71,8 @@ public class MetricAdapter extends AdviceAdapter {
 
     @Override
     protected void onMethodEnter() {
-        if (!metrics.isEmpty()) {
+        if (metrics.size() > 0) {
+            MODIFIED_CLASS_CACHE.add(className);
             LOGGER.log(FINE, "Metrics found on : {0}", methodName);
         }
 
