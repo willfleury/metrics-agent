@@ -1,14 +1,15 @@
 package com.fleury.metrics.agent.transformer.asm;
 
+import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static org.objectweb.asm.Opcodes.ASM5;
+
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.model.Metric;
 import java.util.List;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
-
-import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
-import static org.objectweb.asm.Opcodes.ASM5;
 
 /**
  *
@@ -38,7 +39,10 @@ public class MetricClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
 
-        if (!isInterface && mv != null) {
+        // we don't want to work with synthetic bridge methods
+        boolean isSyntheticMethod = (access & ACC_SYNTHETIC) != 0;
+
+        if (!isInterface && !isSyntheticMethod && mv != null) {
             List<Metric> metadata = config.findMetrics(className, name + desc);
 
             mv = new MetricAdapter(mv, className, access, name, desc, metadata);

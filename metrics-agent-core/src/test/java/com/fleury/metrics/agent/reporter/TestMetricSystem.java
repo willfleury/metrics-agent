@@ -16,16 +16,23 @@ public class TestMetricSystem implements MetricSystem {
 
     private final Map<String, List<Long>> timers = new ConcurrentHashMap<String, List<Long>>();
 
+    private int counterRegistrations = 0;
+    private int gaugeRegistrations = 0;
+    private int timerRegistrations = 0;
+
     @Override
     public void registerCounter(String name, String[] labelNames, String doc) {
+        counterRegistrations++;
     }
 
     @Override
     public void registerGauge(String name, String[] labelNames, String doc) {
+        gaugeRegistrations++;
     }
 
     @Override
     public void registerTimer(String name, String[] labelNames, String doc) {
+        timerRegistrations++;
     }
 
     @Override
@@ -70,6 +77,18 @@ public class TestMetricSystem implements MetricSystem {
 
     public long[] getTimes(String name, String[] labelValues) {
         return convertBoxedToPrimitive(timers.get(getName(name, createSingleLabelValue(labelValues))));
+    }
+
+    public int getCounterRegistrations() {
+        return counterRegistrations;
+    }
+
+    public int getGaugeRegistrations() {
+        return gaugeRegistrations;
+    }
+
+    public int getTimerRegistrations() {
+        return timerRegistrations;
     }
 
     private String getName(String name, String labelValue) {
@@ -142,6 +161,9 @@ public class TestMetricSystem implements MetricSystem {
     public void reset() {
         counters.clear();
         timers.clear();
+        counterRegistrations = 0;
+        gaugeRegistrations = 0;
+        timerRegistrations = 0;
     }
 
 }
