@@ -1,6 +1,8 @@
 package com.fleury.metrics.agent.transformer.asm.injectors;
 
 import static com.fleury.metrics.agent.model.LabelUtil.getLabelVarIndex;
+import static com.fleury.metrics.agent.model.LabelUtil.getNestedLabelVar;
+import static com.fleury.metrics.agent.model.LabelUtil.isLabelVarNested;
 import static com.fleury.metrics.agent.model.LabelUtil.isTemplatedLabelValue;
 import static com.fleury.metrics.agent.model.LabelUtil.isThis;
 
@@ -96,9 +98,18 @@ public abstract class AbstractInjector implements Injector, Opcodes {
 
                 boxParameterAndLoad(argIndex);
             }
-            
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/String", "valueOf",
-                        "(Ljava/lang/Object;)Ljava/lang/String;", false);
+
+            if (isLabelVarNested(labelValue)) {
+                aa.visitLdcInsn(getNestedLabelVar(labelValue));
+
+                aa.visitMethodInsn(INVOKESTATIC, "org/apache/commons/beanutils/PropertyUtils",
+                        "getNestedProperty",
+                        "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;", false);
+            }
+
+            aa.visitMethodInsn(INVOKESTATIC, "java/lang/String",
+                    "valueOf",
+                    "(Ljava/lang/Object;)Ljava/lang/String;", false);
         }
        
         aa.visitInsn(AASTORE);

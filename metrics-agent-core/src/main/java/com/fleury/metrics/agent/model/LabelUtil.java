@@ -27,7 +27,19 @@ public class LabelUtil {
     }
     
     public static int getLabelVarIndex(String value) {
+        if (value.contains(".")) { //nested
+            return Integer.valueOf(value.substring(1, value.indexOf('.')));
+        }
+
         return Integer.valueOf(value.substring(1, value.length()));
+    }
+
+    public static String getNestedLabelVar(String value) {
+        return value.substring(value.indexOf('.') + 1, value.length());
+    }
+
+    public static boolean isLabelVarNested(String value) {
+        return value.contains(".");
     }
     
     public static boolean isThis(String value) {

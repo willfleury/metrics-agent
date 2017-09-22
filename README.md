@@ -111,7 +111,7 @@ public void callService(String client)
 
 Each time this method is invoked it will use the value of the "client" parameter as the metric label value. 
 
-Note that we plan on supporting the ability to navigate object types to get child values like follows `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type HttpRequest. This means you are essentially doing `HttpRequest.getHttpMethod().toString();` We also plan on allowing access to class field values as given using `$fieldname` syntax.
+We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type HttpRequest. This means you are essentially doing `HttpRequest.getHttpMethod().toString();`. This nested can be arbitrarily deep.
 
 
 ## Instrumentation Metadata 
