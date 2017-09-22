@@ -27,7 +27,7 @@ public class LabelUtil {
     }
     
     public static int getLabelVarIndex(String value) {
-        if (value.contains(".")) { //nested
+        if (isLabelVarNested(value)) {
             return Integer.valueOf(value.substring(1, value.indexOf('.')));
         }
 
