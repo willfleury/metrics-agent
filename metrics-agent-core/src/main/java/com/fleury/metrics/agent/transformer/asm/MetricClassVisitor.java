@@ -39,8 +39,9 @@ public class MetricClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
 
-        // we don't want to work with synthetic bridge methods
+        // we don't want to work with synthetic methods (generics can create synthetic bridge methods)
         boolean isSyntheticMethod = (access & ACC_SYNTHETIC) != 0;
+//        boolean isBridge = (access & ACC_BRIDGE) != 0;
 
         if (!isInterface && !isSyntheticMethod && mv != null) {
             List<Metric> metadata = config.findMetrics(className, name + desc);
