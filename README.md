@@ -248,6 +248,10 @@ Very lightweight.
 The client libraries for whatever metric provider you choose are also included. Note that the final agent binaries are shaded and all dependencies relocated to prevent possible conflicts.
 
 
+# Binaries & Releases
+
+See the releases section of the github repository for releases along with the prebuilt agent binaries for codahale and prometheus.
+
 # Building
 
 The module metrics-agent-dist has build profiles for both Prometheus and Codahale. 
