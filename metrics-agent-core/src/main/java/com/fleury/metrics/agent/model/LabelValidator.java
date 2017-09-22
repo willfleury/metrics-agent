@@ -23,20 +23,24 @@ public class LabelValidator {
                 throwLabelInvalidException(value, "Cannot use $this.toString() in Constructor");
             }
         }
-        else if (value.startsWith("$")) {
-            if (!value.matches("\\$[0-9]+") && !value.startsWith("$this")) {
-                throwLabelInvalidException(value, "Must match pattern $[0-9]+ or start with $this");
-            }
-            
-            int index = LabelUtil.getLabelVarIndex(value);
 
-            if (index >= argTypes.length) { 
-                throwLabelInvalidException(value, "It only has " + argTypes.length + " params");
+        if (value.startsWith("$")) {
+            if (!value.matches("\\$([0-9]+|this)([a-zA-Z.]+)*")) {
+                throwLabelInvalidException(value, "Must match pattern \\\\$([0-9]+|this)([a-zA-Z.]+)* or start with $this");
             }
-            
-            Type argType = argTypes[index];
-            if (argType.getSort() == Type.ARRAY) {
-                throwLabelInvalidException(value, "ARRAY type is not allowed");
+
+            if (!value.startsWith("$this")) {
+
+                int index = LabelUtil.getLabelVarIndex(value);
+
+                if (index >= argTypes.length) {
+                    throwLabelInvalidException(value, "It only has " + argTypes.length + " params");
+                }
+
+                Type argType = argTypes[index];
+                if (argType.getSort() == Type.ARRAY) {
+                    throwLabelInvalidException(value, "ARRAY type is not allowed");
+                }
             }
         }
     }

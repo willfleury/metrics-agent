@@ -111,7 +111,7 @@ public void callService(String client)
 
 Each time this method is invoked it will use the value of the "client" parameter as the metric label value. 
 
-Note that we plan on supporting the ability to navigate object types to get child values like follows `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type HttpRequest. This means you are essentially doing `HttpRequest.getHttpMethod().toString();` We also plan on allowing access to class field values as given using `$fieldname` syntax.
+We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type HttpRequest. This means you are essentially doing `HttpRequest.getHttpMethod().toString();`. This nested can be arbitrarily deep.
 
 
 ## Instrumentation Metadata 
@@ -288,13 +288,3 @@ Note if you want to debug the metrics agent you should put the debugger agent fi
 
 	-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=<port> -javaagent:metrics-agent.jar myapp.jar
 
-
-# TODO
-
-Produce configuration for common use cases like Jetty server metrics. Each configurationshould be held in its own module and a build profile added to metrics-agent-dist to include that dependency.
-
-Allow specifying counted or gauged to be invoked at either method start or method end (currently only method start).
-
-Ability to capture the local variables of methods frame stack when an exception occurs and record / report to some external sink for debugging (e.g. encrypted file or server). However, this may branch into another project as it isn't monitoring, rather debugging!
-
-Implement black list support for classes we want to ignore completely for whatever reason.
