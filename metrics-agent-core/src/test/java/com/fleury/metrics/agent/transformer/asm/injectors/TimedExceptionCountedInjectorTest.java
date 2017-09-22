@@ -1,9 +1,8 @@
-package com.fleury.metrics.agent.transformer.asm.injector;
+package com.fleury.metrics.agent.transformer.asm.injectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.fleury.metrics.agent.annotation.Counted;
 import com.fleury.metrics.agent.annotation.ExceptionCounted;
 import com.fleury.metrics.agent.annotation.Timed;
 import java.lang.reflect.InvocationTargetException;
@@ -14,11 +13,11 @@ import org.junit.Test;
  *
  * @author Will Fleury
  */
-public class MixedInjectorTest extends BaseMetricTest {
+public class TimedExceptionCountedInjectorTest extends BaseMetricTest {
 
     @Test
     public void shouldRecordConstructorInvocationStatistics() throws Exception {
-        Class<MixedMetricConstructorClass> clazz = execute(MixedMetricConstructorClass.class);
+        Class<TimedExceptionCountedConstructorClass> clazz = execute(TimedExceptionCountedConstructorClass.class);
 
         Object obj = clazz.newInstance();
 
@@ -26,29 +25,12 @@ public class MixedInjectorTest extends BaseMetricTest {
         assertEquals(1, values.length);
         assertTrue(values[0] >= TimeUnit.NANOSECONDS.toMillis(10L));
 
-        assertEquals(1, metrics.getCount("constructor", new String[]{"counted"}));
         assertEquals(0, metrics.getCount("constructor", new String[]{"exception"}));
     }
 
     @Test
-    public void shouldRecordMethodInvocationStatistics() throws Exception {
-        Class<MixedMetricMethodClass> clazz = execute(MixedMetricMethodClass.class);
-
-        Object obj = clazz.newInstance();
-
-        obj.getClass().getMethod("timed").invoke(obj);
-
-        long[] values = metrics.getTimes("timed", new String[]{"timed"});
-        assertEquals(1, values.length);
-        assertTrue(values[0] >= TimeUnit.NANOSECONDS.toMillis(10L));
-
-        assertEquals(1, metrics.getCount("timed", new String[]{"counted"}));
-        assertEquals(0, metrics.getCount("timed", new String[]{"exception"}));
-    }
-
-    @Test
     public void shouldRecordMethodInvocationWhenExceptionThrownStatistics() throws Exception {
-        Class<MixedMetricMethodClassWithException> clazz = execute(MixedMetricMethodClassWithException.class);
+        Class<TimedExceptionCountedMethodClassWithException> clazz = execute(TimedExceptionCountedMethodClassWithException.class);
 
         Object obj = clazz.newInstance();
 
@@ -67,15 +49,13 @@ public class MixedInjectorTest extends BaseMetricTest {
         assertTrue(values[0] >= TimeUnit.NANOSECONDS.toMillis(10L));
 
         assertEquals(1, metrics.getCount("timed", new String[]{"exception"}));
-        assertEquals(1, metrics.getCount("timed", new String[]{"counted"}));
     }
 
-    public static class MixedMetricConstructorClass {
+    public static class TimedExceptionCountedConstructorClass {
 
         @Timed(name = "constructor", labels = {"type:timed"})
         @ExceptionCounted(name = "constructor", labels = {"type:exception"})
-        @Counted(name = "constructor", labels = {"type:counted"})
-        public MixedMetricConstructorClass() {
+        public TimedExceptionCountedConstructorClass() {
             try {
                 Thread.sleep(10L);
             }
@@ -84,32 +64,17 @@ public class MixedInjectorTest extends BaseMetricTest {
         }
     }
 
-    public static class MixedMetricMethodClass {
+    public static class TimedExceptionCountedMethodClassWithException {
 
         @Timed(name = "timed", labels = {"type:timed"})
         @ExceptionCounted(name = "timed", labels = {"type:exception"})
-        @Counted(name = "timed", labels = {"type:counted"})
-        public void timed() {
-            try {
-                Thread.sleep(10L);
-            }
-            catch (InterruptedException e) {
-            }
-        }
-    }
-
-    public static class MixedMetricMethodClassWithException {
-
-        @Timed(name = "timed", labels = {"type:timed"})
-        @ExceptionCounted(name = "timed", labels = {"type:exception"})
-        @Counted(name = "timed", labels = {"type:counted"})
         public void timed() {
             try {
                 Thread.sleep(10L);
                 callService();
             }
             catch (InterruptedException e) {
-            }
+            } 
         }
         
         public final void callService() {

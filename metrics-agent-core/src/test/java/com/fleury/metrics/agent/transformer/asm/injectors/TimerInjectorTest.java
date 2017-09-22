@@ -1,4 +1,4 @@
-package com.fleury.metrics.agent.transformer.asm.injector;
+package com.fleury.metrics.agent.transformer.asm.injectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

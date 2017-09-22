@@ -1,4 +1,4 @@
-package com.fleury.metrics.agent.transformer.asm.injector;
+package com.fleury.metrics.agent.transformer.asm.injectors;
 
 import static com.fleury.metrics.agent.config.Configuration.convertConfigClassNameToInternal;
 
