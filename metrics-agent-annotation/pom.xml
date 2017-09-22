@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.fleury</groupId>
         <artifactId>metrics-agent</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.4-SNAPSHOT</version>
     </parent>
     <artifactId>metrics-agent-annotation</artifactId>
 	<name>metrics-agent-annotation</name>

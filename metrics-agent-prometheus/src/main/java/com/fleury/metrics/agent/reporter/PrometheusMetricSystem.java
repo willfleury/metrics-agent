@@ -27,7 +27,7 @@ public class PrometheusMetricSystem implements MetricSystem {
 
     @Override
     public void registerCounter(String name, String[] labels, String doc) {
-        Counter.Builder builder = (Counter.Builder) Counter.build().name(name).help(doc);
+        Counter.Builder builder = Counter.build().name(name).help(doc);
         if (labels != null) {
             builder.labelNames(labels);
         }
@@ -37,7 +37,7 @@ public class PrometheusMetricSystem implements MetricSystem {
 
     @Override
     public void registerGauge(String name, String[] labels, String doc) {
-        Gauge.Builder builder = (Gauge.Builder) Gauge.build().name(name).help(doc);
+        Gauge.Builder builder = Gauge.build().name(name).help(doc);
         if (labels != null) {
             builder.labelNames(labels);
         }
@@ -47,7 +47,7 @@ public class PrometheusMetricSystem implements MetricSystem {
 
     @Override
     public void registerTimer(String name, String[] labels, String doc) {
-        Summary.Builder builder = (Summary.Builder) Summary.build().name(name).help(doc);
+        Summary.Builder builder = Summary.build().name(name).help(doc);
         if (labels != null) {
             builder.labelNames(labels);
         }
