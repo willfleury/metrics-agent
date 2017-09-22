@@ -6,8 +6,8 @@
         <artifactId>metrics-agent</artifactId>
         <version>0.0.4-SNAPSHOT</version>
     </parent>
-    <artifactId>metrics-agent-codahale</artifactId>
-    <name>metrics-agent-codahale</name>
+    <artifactId>metrics-agent-dropwizard</artifactId>
+    <name>metrics-agent-dropwizard</name>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -20,6 +20,12 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
+            <version>${dropwizard.metrics}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jvm</artifactId>
             <version>${dropwizard.metrics}</version>
         </dependency>
     </dependencies>

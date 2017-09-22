@@ -16,13 +16,13 @@ public class MetricSystemProviderFactory {
 
     private final MetricSystemProvider provider;
     
-    private Map<String, String> configuration;
+    private Map<String, Object> configuration;
 
     private MetricSystemProviderFactory() {
         this.provider = initialiseMetricSystem();
     }
     
-    public void init(Map<String, String> configuration) {
+    public void init(Map<String, Object> configuration) {
         this.configuration = configuration;
     }
 

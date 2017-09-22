@@ -13,7 +13,7 @@
 
         <agent.artifact.name>metrics-agent</agent.artifact.name>
 
-        <dropwizard.metrics>3.1.0</dropwizard.metrics>
+        <dropwizard.metrics>3.2.5</dropwizard.metrics>
         <asm.version>5.1</asm.version>
         <prometheus.version>0.0.26</prometheus.version>
         <jackson.version>2.4.0</jackson.version>
@@ -26,7 +26,7 @@
     <modules>
         <module>metrics-agent-core</module>
         <module>metrics-agent-annotation</module>
-        <module>metrics-agent-codahale</module>
+        <module>metrics-agent-dropwizard</module>
         <module>metrics-agent-prometheus</module>
         <module>metrics-agent-dist</module>
     </modules>

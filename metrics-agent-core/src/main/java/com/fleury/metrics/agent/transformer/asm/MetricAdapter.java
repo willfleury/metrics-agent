@@ -9,6 +9,7 @@ import com.fleury.metrics.agent.model.MetricType;
 import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.transformer.asm.injectors.Injector;
 import com.fleury.metrics.agent.transformer.asm.injectors.InjectorFactory;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,10 +72,13 @@ public class MetricAdapter extends AdviceAdapter {
 
     @Override
     protected void onMethodEnter() {
-        if (metrics.size() > 0) {
-            MODIFIED_CLASS_CACHE.add(className);
-            LOGGER.log(FINE, "Metrics found on : {0}", methodName);
+        if (metrics.isEmpty()) {
+            injectors = Collections.emptyList();
+            return;
         }
+
+        MODIFIED_CLASS_CACHE.add(className);
+        LOGGER.log(FINE, "Metrics found on : {0}", methodName);
 
         injectors = InjectorFactory.createInjectors(metrics, this, argTypes, access);
         validateLabels();

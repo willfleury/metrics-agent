@@ -203,16 +203,18 @@ Prometheus is the primary supported metric system. The design of the metric meta
 Also, given the fact that we use the multidimensional labels concept from Prometheus, if we use a system which doesn't support this notion then it is not nearly as powerful. 
 
 
-### Codahale 
+### Dropwizard 
 
 Sometimes however, we don't want to go to all the hassle of setting up and entire metrics monitoring system if we don't have one already in place and are only interested in the metrics on a single JVM. 
-This is where we would recommend Codahale as it provides summary statistics (percentiles, rates etc) out of the box for certain metric types. These are automatically exposed via JVM and can be viewed and graphed with the likes of the VisualVM JMX plugin. 
+This is where we would recommend Dropwizard as it provides summary statistics (percentiles, rates etc) out of the box for certain metric types. These are automatically exposed via JVM and can be viewed and graphed with the likes of the VisualVM JMX plugin. 
 
-Some differences in metric types exist between Prometheus and Codahale. In particular, with Prometheus you don't decrement counters, instead you use gauges for values that increase and decrease. Supporting this approach with Codahale gauges with an agent is tricky as we need to maintain a class variable. Hence, we simply use counters to back gauges with Codahale. 
+Some differences in metric types exist between Prometheus and Dropwizard. In particular, with Prometheus you don't decrement counters, instead you use gauges for values that increase and decrease. Supporting this approach with Dropwizard gauges with an agent is tricky as we need to maintain a class variable. Hence, we simply use counters to back gauges with Dropwizard. 
 
 Profiling agents can sometimes be far to heavy to attach to a JVM for a prolonged period of time and impact performance when we only want to monitor certain methods / hotspots. Also, most of the time these tools do not provide summary metrics exception counts which can be recorded with this library.
 
 ### Configuration
+
+#### Metrics Configuration
 
 The metric systems configuration is passed as simple key-value pairs `(Map<String,String>)` to the constructor of each MetricSystem via their provider. These key-values are defined in the "system" section of the agent configuration.
 
@@ -221,20 +223,43 @@ The metric systems configuration is passed as simple key-value pairs `(Map<Strin
 
     system:
         key1: value1
+        
+The dropwizard implementation supports the property `domain` which allows to change the exposed JMX domain name. It defaults to the dropwizard default of `metrics`. See the next section for some shared properties around JVM level metrics.
+
+       
+#### Adding JVM Level Metric Information
+
+Both Dropwizard and Prometheus support adding JVM level metrics information obtained from the JVM via MBeans for 
+
+- gc
+- memory
+- classloading
+- threads
+
+To enable each, simply add the metrics you want to a `jvm` property in the `system` section of the configuration yaml. For example, to add `gc` and `memory` information to the registry used:
+
+    system:
+        jvm:
+           - gc
+           - memory
+
+
+#### Agent Reporting
+
+We start the default reporting methods on both metrics systems. For Dropwizard that is JMX (which can be scraped via other services), and for Prometheus that is the HttpServer. The default port for the Prometheus endpoint is `9899` and it can be changed by specifying the property `httpPort` in the system configuration section as follows
+
+    system:
+        httpPort: 9899
+
+Additional reporting systems can be added for each agent programatically if required.      
+        
+#### Logger Configuration        
 
 j.u.l is used for logging and can be configured by passing the agent argument `log-config:<properties path>` to the agent with the path to the logger properties file. 
 
 
 ## Performance
-We use the Java ASM bytecode manipulation library. This is the lowest level and fastest of all the bytecode libraries which is used by the likes of cglib. It allows us to inject bytecode in a precise way which means we can craft the exact same bytecode as if it was hand written. 
-
-Application startup time is affected slightly (milliseconds). As the bytecode is the exact same as if you were to manually instrument the code by hand, the Application has no real performance overhead than if you wrote it by hand. However, there is currently one performance penalty which must be paid which is not always the case with hand crafted. To make the metric system pluggable, we chose to abstract the metric work behind a generic SPI interface. The bytecode which we inject uses the SPI which can in turn be swapped out without any change to our bytecode. This makes it very flexible but it comes at the cost of not being able to keep field level static variable references for our metrics. Instead we perform a lookup from a ConcurrentHashMap to get the metric by name in the SPIs. Note that JIT takes care of the additional method dispatches up to the Map by performing inlining. To change to injecting field variables into the classes instead of performing this lookup via the SPI would require chaning to either the ASM Tree API or removing ability to use annotations. The reason is that we visit the method annotations after the class fields. We will look at both options going forward.
-
-The reason we chose ConcurrentHashMap and not HashMap is that it even though we don't require its concurrency features (as registration (put) is single threaded), it has better performance characteristics for get() across the various generations of JDKs this library supports (JDK 6+). It uses slightly more memory than basic HashMap but this is a negligible concern. On average the lookup adds an additional 10 nanoseconds overhead on metric operations. To put this into context; if you are instrumenting a request dispatcher and the average request duration is 1 millisecond, then the effect of the lookup is an additional overhead of 0.000001%. If however this is a performance sensitive method which has a typical invocation duration in the nanoseconds then hand crafted metrics should be considered. Similarly if there are many hash collisions this lookup will become slower.
-
-On basic counters, this is noticeable but on other metric types it becomes less observable. We did notice however that when using labels with Prometheus counters there is a significant overhead introduced which makes the lookup even less noticeable. Here are some basic figures of both Prometheus and Codahale counters with and without lookups performed. 
-
-We will produce JMH benchmarks to prove the above notes, however since we are only adding an additional map based lookup the benchmarks do not add much to the respective metric system benchmarks apart from also measuring this lookup.  
+We use the Java ASM bytecode manipulation library. This is the lowest level and fastest of all the bytecode libraries which is used by the likes of cglib. It allows us to inject bytecode in a precise way which means we can craft the exact same bytecode as if it was hand written. To make the metric system plugable, we chose to abstract the metric work behind a generic SPI interface. The bytecode which we inject uses the SPI which can in turn be swapped out without any change to our bytecode. This makes it very flexible but it comes at the cost of not being able to keep field level static variable references for our metrics. Instead we perform a lookup from a ConcurrentHashMap to get the metric by name in the SPIs. Note that JIT takes care of the additional method dispatches up to the Map by performing inlining. If we were using a single implementation we would inject the metrics fields as static variables at the top of each class. If someone wishes to fork this for a single metric system that would be the best way to go.
 
 It should be noted that as with hand crafted metrics, the additional bytecode and hence method size required to handle capturing all metrics could potentially lead to methods which might otherwise have been inlined or compiled by the JIT being skipped instead. This should be considered regardless off the instrumentation choice and if unsure, the appropriate JVM output should be checked (-XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining -XX:+PrintCompilation).
  
@@ -250,15 +275,15 @@ The client libraries for whatever metric provider you choose are also included. 
 
 # Binaries & Releases
 
-See the releases section of the github repository for releases along with the prebuilt agent binaries for codahale and prometheus.
+See the releases section of the github repository for releases along with the prebuilt agent binaries for dropwizard and prometheus.
 
 # Building
 
-The module metrics-agent-dist has build profiles for both Prometheus and Codahale. 
+The module metrics-agent-dist has build profiles for both Prometheus and Dropwizard. 
 
 	mvn clean package -Pprometheus
 
-	mvn clean package -Pcodahale
+	mvn clean package -Pdropwizard
 	
 The uber jar can be found under /target/metrics-agent.jar
 

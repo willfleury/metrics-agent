@@ -1,12 +1,26 @@
 package com.fleury.metrics.agent.reporter;
 
+import static java.util.logging.Level.WARNING;
+
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Summary;
+import io.prometheus.client.exporter.HTTPServer;
+import io.prometheus.client.hotspot.ClassLoadingExports;
+import io.prometheus.client.hotspot.GarbageCollectorExports;
+import io.prometheus.client.hotspot.MemoryPoolsExports;
 import io.prometheus.client.hotspot.StandardExports;
+import io.prometheus.client.hotspot.ThreadExports;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -14,15 +28,24 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PrometheusMetricSystem implements MetricSystem {
 
-    private final static Map<String, Counter> COUNTERS = new ConcurrentHashMap<String, Counter>();
-    private final static Map<String, Gauge> GAUGES = new ConcurrentHashMap<String, Gauge>();
-    private final static Map<String, Summary> SUMMARIES = new ConcurrentHashMap<String, Summary>();
-    
-    private final Map<String, String> configuration;
+    private static final Logger LOGGER = Logger.getLogger(PrometheusMetricSystem.class.getName());
 
-    protected PrometheusMetricSystem(Map<String, String> configuration) {
+    private static final Map<String, Counter> COUNTERS = new ConcurrentHashMap<String, Counter>();
+    private static final Map<String, Gauge> GAUGES = new ConcurrentHashMap<String, Gauge>();
+    private static final Map<String, Summary> SUMMARIES = new ConcurrentHashMap<String, Summary>();
+
+    private static final int DEFAULT_HTTP_PORT = 9899;
+    
+    private final Map<String, Object> configuration;
+
+    protected PrometheusMetricSystem(Map<String, Object> configuration) {
         this.configuration = configuration;
+
         new StandardExports().register();
+
+        addJVMMetrics(configuration);
+
+        addReporters(configuration);
     }
 
     @Override
@@ -102,6 +125,45 @@ public class PrometheusMetricSystem implements MetricSystem {
             summary.labels(labels).observe(duration);
         } else {
             summary.observe(duration);
+        }
+    }
+
+    private void addJVMMetrics(Map<String, Object> configuration) {
+        if (!configuration.containsKey("jvm")) {
+            return;
+        }
+        Set<String> jvmMetrics = new HashSet<String>((List<String>)configuration.get("jvm"));
+        if (jvmMetrics.contains("gc")) {
+            new GarbageCollectorExports().register();
+        }
+
+        if (jvmMetrics.contains("threads")) {
+            new ThreadExports().register();
+        }
+
+        if (jvmMetrics.contains("memory")) {
+            new MemoryPoolsExports().register();
+        }
+
+        if (jvmMetrics.contains("classloader")) {
+            new ClassLoadingExports().register();
+        }
+    }
+
+    private void addReporters(Map<String, Object> configuration) {
+        int port = DEFAULT_HTTP_PORT;
+
+        if (configuration.containsKey("httpPort")) {
+            port = Integer.parseInt((String)configuration.get("httpPort"));
+        }
+
+        try {
+            LOGGER.info("Starting Prometheus HttpServer on port " + port);
+
+            new HTTPServer(port);
+
+        } catch (Exception e) { //widen scope in case of ClassNotFoundException on non oracle/sun JVM
+            LOGGER.log(WARNING, "Unable to register Prometheus HttpServer on port " + port, e);
         }
     }
 

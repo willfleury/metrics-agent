@@ -8,5 +8,5 @@ import java.util.Map;
  */
 public interface MetricSystemProvider {
 
-    MetricSystem createMetricSystem(Map<String, String> configuration);
+    MetricSystem createMetricSystem(Map<String, Object> configuration);
 }

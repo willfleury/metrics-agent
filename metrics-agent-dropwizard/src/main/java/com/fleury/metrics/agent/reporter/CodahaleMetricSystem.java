@@ -2,7 +2,15 @@ package com.fleury.metrics.agent.reporter;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
+import com.codahale.metrics.jvm.CachedThreadStatesGaugeSet;
+import com.codahale.metrics.jvm.ClassLoadingGaugeSet;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -14,12 +22,13 @@ public class CodahaleMetricSystem implements MetricSystem {
 
     private static final Logger LOGGER = Logger.getLogger(CodahaleMetricSystem.class.getName());
 
-    private final MetricRegistry registry = new MetricRegistry();
-    private final Map<String, String> configuration;
+    private final MetricRegistry registry = SharedMetricRegistries.getOrCreate("agent-metrics");
+    private final Map<String, Object> configuration;
 
-    public CodahaleMetricSystem(Map<String, String> configuration) {
+    public CodahaleMetricSystem(Map<String, Object> configuration) {
         this.configuration = configuration;
-        startJmxReporter();
+        addJVMMetrics(configuration);
+        startJmxReporter(configuration);
     }
 
     @Override
@@ -80,11 +89,39 @@ public class CodahaleMetricSystem implements MetricSystem {
         return builder.toString();
     }
 
-    private void startJmxReporter() {
-        LOGGER.fine("Starting JMX reporter");
+    private void addJVMMetrics(Map<String, Object> configuration) {
+        if (!configuration.containsKey("jvm")) {
+            return;
+        }
+        Set<String> jvmMetrics = new HashSet<String>((List<String>)configuration.get("jvm"));
+        if (jvmMetrics.contains("gc")) {
+            registry.register("gc", new GarbageCollectorMetricSet());
+        }
+
+        if (jvmMetrics.contains("threads")) {
+            registry.register("threads", new CachedThreadStatesGaugeSet(10, TimeUnit.SECONDS));
+        }
+
+        if (jvmMetrics.contains("memory")) {
+            registry.register("memory", new MemoryUsageGaugeSet());
+        }
+
+        if (jvmMetrics.contains("classloader")) {
+            registry.register("memory", new ClassLoadingGaugeSet());
+        }
+    }
+
+    private void startJmxReporter(Map<String, Object> configuration) {
+        String domain = (String)configuration.get("domain");
+        if (domain == null) {
+            domain = "metrics";
+        }
+
+        LOGGER.fine("Starting JMX reporter at domain: " + domain);
 
         JmxReporter
                 .forRegistry(registry)
+                .inDomain(domain)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .convertRatesTo(TimeUnit.MINUTES)
                 .build()

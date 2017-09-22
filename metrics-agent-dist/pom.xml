@@ -30,11 +30,11 @@
         </profile>
 
         <profile>
-            <id>codahale</id>
+            <id>dropwizard</id>
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
-                    <artifactId>metrics-agent-codahale</artifactId>
+                    <artifactId>metrics-agent-dropwizard</artifactId>
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>

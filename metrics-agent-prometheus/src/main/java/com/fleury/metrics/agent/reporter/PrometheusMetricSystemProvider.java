@@ -9,7 +9,7 @@ import java.util.Map;
 public class PrometheusMetricSystemProvider implements MetricSystemProvider {
 
     @Override
-    public MetricSystem createMetricSystem(Map<String, String> configuration) {
+    public MetricSystem createMetricSystem(Map<String, Object> configuration) {
         return new PrometheusMetricSystem(configuration);
     }
 

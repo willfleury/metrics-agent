@@ -49,7 +49,7 @@ public class Configuration {
     private Map<Key, List<Metric>> metrics;
 
     @JsonProperty("system")
-    private Map<String, String> metricSystemConfiguration;
+    private Map<String, Object> metricSystemConfiguration;
 
     public Configuration() {
         this(new HashMap<Key, List<Metric>>());
@@ -68,7 +68,7 @@ public class Configuration {
         return metrics;
     }
     
-    public Map<String, String> getMetricSystemConfiguration() {
+    public Map<String, Object> getMetricSystemConfiguration() {
         return metricSystemConfiguration;
     }
 
