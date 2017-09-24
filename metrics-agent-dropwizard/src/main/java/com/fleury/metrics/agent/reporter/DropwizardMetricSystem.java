@@ -18,14 +18,14 @@ import java.util.logging.Logger;
  *
  * @author Will Fleury
  */
-public class CodahaleMetricSystem implements MetricSystem {
+public class DropwizardMetricSystem implements MetricSystem {
 
-    private static final Logger LOGGER = Logger.getLogger(CodahaleMetricSystem.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DropwizardMetricSystem.class.getName());
 
     private final MetricRegistry registry = SharedMetricRegistries.getOrCreate("agent-metrics");
     private final Map<String, Object> configuration;
 
-    public CodahaleMetricSystem(Map<String, Object> configuration) {
+    public DropwizardMetricSystem(Map<String, Object> configuration) {
         this.configuration = configuration;
         addJVMMetrics(configuration);
         startJmxReporter(configuration);

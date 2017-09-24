@@ -191,6 +191,21 @@ Note the method signature is based on the method parameter types and return type
 parameter types are between the brackets `()` with the return type after. In this case
 we have no parameters and the return type is void which results in `()V`. [Here](http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html) is a good overview of Java method signature mappings.
 
+### White & Black Lists
+
+Sometimes we only want to scan certain packages or classes which we wish to instrument or scan for annotations to instrument. This could be to reduce the agent startup time or to work around problematic instrumentation situations. Note that the black and white lists do not take any annotations or metric configuration into account.
+
+To white list a class or package include the fully qualified class or package name under the `whiteList` property. If no white list is specified, then all classes are scanned and eligible for transforming. 
+
+    whiteList:
+      - com/fleury/test/ClassName
+      - com/fleury/package2
+        
+To black list a class or package add the fully qualified class or package name under the `blackList` property. If a class or package is in both white and black list, the black list wins and the class will not be touched.
+
+    blackList:
+       - com/
+
 ### What we actually Transform
 As we allow the use of annotations to register metrics to track, we must scan all classes as they are loaded and check for the annotations. However, we do not want to 
 have to rewrite all of these classes if we have not changed anything. There are many reasons you want to modify as little as possible with an agent but the general motto is, only touch what you have to. Hence, we only rewrite classes which have been changed due to the addition of metrics and all other classes, even though scanned, are returned untouched to the classloader.
@@ -212,9 +227,7 @@ Some differences in metric types exist between Prometheus and Dropwizard. In par
 
 Profiling agents can sometimes be far to heavy to attach to a JVM for a prolonged period of time and impact performance when we only want to monitor certain methods / hotspots. Also, most of the time these tools do not provide summary metrics exception counts which can be recorded with this library.
 
-### Configuration
-
-#### Metrics Configuration
+### Metric System Configuration
 
 The metric systems configuration is passed as simple key-value pairs `(Map<String,String>)` to the constructor of each MetricSystem via their provider. These key-values are defined in the "system" section of the agent configuration.
 
@@ -225,7 +238,6 @@ The metric systems configuration is passed as simple key-value pairs `(Map<Strin
         key1: value1
         
 The dropwizard implementation supports the property `domain` which allows to change the exposed JMX domain name. It defaults to the dropwizard default of `metrics`. See the next section for some shared properties around JVM level metrics.
-
        
 #### Adding JVM Level Metric Information
 
@@ -253,7 +265,7 @@ We start the default reporting methods on both metrics systems. For Dropwizard t
 
 Additional reporting systems can be added for each agent programatically if required.      
         
-#### Logger Configuration        
+### Logger Configuration        
 
 j.u.l is used for logging and can be configured by passing the agent argument `log-config:<properties path>` to the agent with the path to the logger properties file. 
 

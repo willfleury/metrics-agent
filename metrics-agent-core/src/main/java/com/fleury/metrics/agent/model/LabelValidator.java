@@ -18,10 +18,8 @@ public class LabelValidator {
     }
     
     public void validate(String value) {
-        if (value.startsWith("$this")) {
-            if (method.equals("<init>")) {
-                throwLabelInvalidException(value, "Cannot use $this.toString() in Constructor");
-            }
+        if (value.startsWith("$this") && method.equals("<init>")) {
+            throwLabelInvalidException(value, "Cannot use $this in Constructor");
         }
 
         if (value.startsWith("$")) {
@@ -48,7 +46,7 @@ public class LabelValidator {
     
     private void throwLabelInvalidException(String value, String reason) {
         throw new IllegalArgumentException(
-                String.format("Label value %s for method %s is invalid. %s", value, method, reason));
+                "Label value " + value + " for method " + method + " is invalid: " + reason);
     }
 
 }
