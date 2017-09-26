@@ -35,23 +35,23 @@ public class Reporter {
                     break;
 
                 default:
-                    throw new RuntimeException("Uhanlded metric registration for type: " + metric.getType());
+                    throw new RuntimeException("Unhandled metric registration for type: " + metric.getType());
             }
         }
     }
 
     public static void registerCounter(String name, String[] labelNames, String doc) {
-        LOGGER.log(FINER, "registering metric name: {} doc: {}", new Object[] {name, doc});
+        LOGGER.log(FINER, "registering metric name: {0} doc: {1}", new Object[] {name, doc});
         METRIC_SYSTEM.registerCounter(name, labelNames, doc);
     }
 
     public static void registerGauge(String name, String[] labelNames, String doc) {
-        LOGGER.log(FINER, "registering metric name: {} doc: {}", new Object[] {name, doc});
+        LOGGER.log(FINER, "registering metric name: {0} doc: {1}", new Object[] {name, doc});
         METRIC_SYSTEM.registerGauge(name, labelNames, doc);
     }
 
     public static void registerTimer(String name, String[] labelNames, String doc) {
-        LOGGER.log(FINER, "registering metric name: {} doc: {}", new Object[] {name, doc});
+        LOGGER.log(FINER, "registering metric name: {0} doc: {1}", new Object[] {name, doc});
         METRIC_SYSTEM.registerTimer(name, labelNames, doc);
     }
 

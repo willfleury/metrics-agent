@@ -4,7 +4,6 @@ import static java.util.logging.Level.FINE;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -18,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,33 +45,6 @@ public class Configuration {
         }
     };
 
-    @JsonProperty("metrics")
-    private Map<Key, List<Metric>> metrics;
-
-    @JsonProperty("system")
-    private Map<String, Object> metricSystemConfiguration;
-
-    public Configuration() {
-        this(new HashMap<Key, List<Metric>>());
-    }
-
-    public Configuration(Map<Key, List<Metric>> metrics) {
-        this.metrics = metrics;
-    }
-
-    public List<Metric> findMetrics(String className, String method) {
-        Key key = new Key(className, method);
-        return metrics.containsKey(key) ? metrics.get(key) : Collections.<Metric>emptyList();
-    }
-
-    public Map<Key, List<Metric>> getMetrics() {
-        return metrics;
-    }
-    
-    public Map<String, Object> getMetricSystemConfiguration() {
-        return metricSystemConfiguration;
-    }
-
     public static Configuration createConfig(String filename) {
         if (filename == null) {
             return new Configuration();
@@ -97,11 +70,90 @@ public class Configuration {
         }
     }
 
+    @JsonProperty("metrics")
+    private Map<Key, List<Metric>> metrics = Collections.emptyMap();
+
+    @JsonProperty("system")
+    private Map<String, Object> metricSystemConfiguration = Collections.emptyMap();
+
+    @JsonProperty("whiteList")
+    private List<String> whiteList = Collections.emptyList();
+
+    @JsonProperty("blackList")
+    private List<String> blackList = Collections.emptyList();
+
+    public Configuration() {
+        this(new HashMap<Key, List<Metric>>());
+    }
+
+    public Configuration(Map<Key, List<Metric>> metrics) {
+        this.metrics = metrics;
+    }
+
+    public List<Metric> findMetrics(String className, String method) {
+        Key key = new Key(className, method);
+        return metrics.containsKey(key) ? metrics.get(key) : Collections.<Metric>emptyList();
+    }
+
+    public Map<Key, List<Metric>> getMetrics() {
+        return metrics;
+    }
+    
+    public Map<String, Object> getMetricSystemConfiguration() {
+        return metricSystemConfiguration;
+    }
+
+    public List<String> getWhiteList() {
+        return whiteList;
+    }
+
+    public List<String> getBlackList() {
+        return blackList;
+    }
+
+    public void setWhiteList(List<String> whiteList) {
+        this.whiteList = whiteList;
+    }
+
+    public void setBlackList(List<String> blackList) {
+        this.blackList = blackList;
+    }
+
+    public boolean isWhiteListed(String className) {
+        if (whiteList.isEmpty()) {
+            return true;
+        }
+
+        for (String white : whiteList) {
+            if (className.startsWith(white)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isBlackListed(String className) {
+        if (blackList.isEmpty()) {
+            return false;
+        }
+
+        for (String black : blackList) {
+            if (className.startsWith(black)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Configuration{" +
                 "metrics=" + metrics +
                 ", metricSystemConfiguration=" + metricSystemConfiguration +
+                ", whiteList=" + whiteList +
+                ", blackList=" + blackList +
                 '}';
     }
 
@@ -161,9 +213,7 @@ public class Configuration {
     static class MetricKey extends KeyDeserializer {
 
         @Override
-        public Object deserializeKey(final String key,
-                final DeserializationContext ctxt)
-                throws IOException, JsonProcessingException {
+        public Object deserializeKey(final String key, final DeserializationContext ctxt) throws IOException {
             String className = convertConfigClassNameToInternal(key.substring(0, key.lastIndexOf(".")));
             String methodName = key.substring(key.lastIndexOf(".") + 1, key.length());
 

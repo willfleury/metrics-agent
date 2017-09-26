@@ -1,1 +1,1 @@
-com.fleury.metrics.agent.reporter.CodahaleMetricSystemProvider  
+com.fleury.metrics.agent.reporter.DropwizardMetricSystemProvider

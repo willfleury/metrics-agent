@@ -1,7 +1,12 @@
 # Overview
 
 ## Motivation
-Agent based instrumentation vs client code based.
+Agent based bytecode instrumentation is a far more elegant, faster and safer approach to instrumenting code on the JVM. Programatic addition of metrics into client code leads to severe code bloat and lack of clarity of the underlying business logic. 
+
+The advantage of agent based bytecode instrumentation vs annotation driven using dependency injection (DI) frameworks like Spring and Guice is quite simple, you don't need to be using Spring or Guice to benefit from it. Another issue with such DI frameworks is that they can only code you they own the injection of which causes some headaches and you must still annotate or otherwise mark the locations to instrument in code. The agent doesn't care if the code you want to instrument is yours, a third party library or the JDK itself.
+
+The ability to simply update a configuration file indicating the metric and code location we want to measure, and simply restart the application to begin gathering measurements in that new location is invaluable and saves a considerable amount of developer time and results in faster performance debugging sessions.
+
 
 ### Code Bloat
 	
@@ -71,52 +76,10 @@ WOW! That turned ugly fast! We started with 3 LOC (lines of code) representing t
 
 With agent based instrumentation we can inject bytecode which results in the exact same method bytecode as would be produced by writing and compiling the final metric example, but without touching the source.
 
-### Dependency Injection 
-Dependency injection frameworks like Spring and Guice have support and libraries to enable annotation driven instrumentation of classes. However, to reply on DI frameworks to instrument class it means that the classes you want to instrument must be injected via the framework. This results in some severe restrictions and can be quite painful when you think a method is being instrumented but in fact it is not.
-
-
-### Third Party Code
-Sometimes we don't have access to the source code for a piece of code we would like to instrument. With agent based instrumentation this isn't an issue and we can instrument it as if it were ours.
-
-Other times, even if the code is available we may still want to instrument certain parts of it without forking it, adding metric code and maintaining it. Agent based metrics gets us out of this bind also.
-
-Don't forget, the JDK is just another library which can be instrumented!
-
-### Human Error
-Monotonous code is more susceptible to bugs. Instrumentation of the above metrics can be seen as exceptionally tedious. Therefore, as the number of instrumented methods increase, the likelihood of a bug increases rapidly. Using agent based instrumentation removes this possibility. 
-
-Incorrectly naming a metric can also be considered a bug. Fixing this with manual instrumentation requires a code change and redeploy. This is also the case if using annotation based agent instrumentation. However, if using the configuration driven agent instrumentation then this is a simple matter of updating the configuration and restarting the application.
-
-
-## Features
-
-## Labels
-
-Labels are composed of name value pairs `({name}:{value})`. You can have up to a maximum of five labels per metric. 
-
-See the Prometheus metric library guidelines on metric and label naming [here](https://prometheus.io/docs/practices/naming/).
-
-### Dynamic Label Values
-
-Label values can be dynamic and set based on variables available on the method stack. Metric names cannot be dynamic. The way we specify dynamic label values is using the `${index}` syntax followed by the method argument index. The special value `"$this"` can be used for referencing `"this.toString()"` in non static methods (i.e. where `"this."` is valid).
- 
-Note that we restrict the stack usage to the method arguments only. That is, we don't allow use of variables created within the method as that is a very fragile thing to do. 
-
-The String representation as given by `String.valueOf()` of the parameter is used as the label value. That means for primitive types we perform boxing first and null objects will result in the String `"null"`. Argument indexes start at index 0. 
-
-```java
-@Counted (name = "service_total", labels = { "client:$0" })
-public void callService(String client) 
-```
-
-Each time this method is invoked it will use the value of the "client" parameter as the metric label value. 
-
-We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type HttpRequest. This means you are essentially doing `HttpRequest.getHttpMethod().toString();`. This nested can be arbitrarily deep.
-
 
 ## Instrumentation Metadata 
 
-You can use either annotations or configuration to instrument your code. Obviously the later doesn't require you to actually change your code whereas the former does. 
+For those who like marking methods to measure programatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition.
 
 ### Annotations
 
@@ -181,19 +144,60 @@ public class TestClass {
 We write the configuration as follows
 
 	metrics:
-	  com.fleury.test.TestClass.performSomeTask()V:
+	  com/fleury/test/TestClass.performSomeTask()V:
 	    - type: Counted
 		  name: taskx_total
 		  doc: total invocations of task x
 
 
-Note the method signature is based on the method parameter types and return type. The
-parameter types are between the brackets `()` with the return type after. In this case
-we have no parameters and the return type is void which results in `()V`. [Here](http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html) is a good overview of Java method signature mappings.
+Note the method signature is based on the method parameter types and return type. The parameter types are between the brackets `()` with the return type after. In this case we have no parameters and the return type is void which results in `()V`. [Here](http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html) is a good overview of Java method signature mappings.
+
+In previous versions we allowed the package name to be specified using `.` instead of the internal `/` separator. While this is still supported for the metrics configuration section, it is not supported anywhere else and should be updated to only have the `/` package separator. 
+
+
+### Metric Labels
+
+Labels are a concept in some reporting systems that allow for multi-dimensional metric capture and analysis. Labels are composed of name value pairs `({name}:{value})`. You can have up to a maximum of five labels per metric. See the Prometheus metric library guidelines on metric and label naming [here](https://prometheus.io/docs/practices/naming/). Dropwizard metrics doesn't support the concept of labels and so we use the label values as part of the metric name. We apply these in order and so a metric definition of  
+
+```java
+@Counted(name = "taskx_total", labels = {"name1:value1", "name2:value2"})
+```
+
+would result in a metric name in the Dropwizard registry of `taskx_total.value1.value2`.
+
+
+#### Dynamic Label Values
+
+A powerful feature is the ability to set label values dynamic based on variables available on the method stack. Metric names cannot be dynamic. The way we specify dynamic label values is using the `${index}` syntax followed by the method argument index. The special value `$this` can be used for referencing `this.toString()` in non static methods (i.e. where `this.` is valid).
+ 
+Note that we restrict the stack usage to the method arguments only. That is, we don't allow use of variables created within the method as that is a very fragile thing to do. The String representation as given by `String.valueOf()` of the parameter is used as the label value. That means for primitive types we perform boxing first and null objects will result in the String `"null"`. Argument indexes start at index `0`. 
+
+```java
+@Counted (name = "service_total", labels = { "client:$0" })
+public void callService(String client) 
+```
+
+Each time this method is invoked it will use the value of the "client" parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep.
+
+### White & Black Lists
+
+Sometimes we only want to scan certain packages or classes which we wish to instrument. This could be to reduce the agent startup time or to work around problematic instrumentation situations. Note that the black and white lists do not take any annotations or metric configuration into account and essentially override them.
+
+To white list a class or package include the fully qualified class or package name under the `whiteList` property. If no white list is specified, then all classes are scanned and eligible for transforming. 
+
+    whiteList:
+      - com/fleury/test/ClassName
+      - com/fleury/package2
+        
+To black list a class or package add the fully qualified class or package name under the `blackList` property. If a class or package is in both white and black list, the black list wins and the class will not be touched.
+
+    blackList:
+       - com/
+
 
 ### What we actually Transform
-As we allow the use of annotations to register metrics to track, we must scan all classes as they are loaded and check for the annotations. However, we do not want to 
-have to rewrite all of these classes if we have not changed anything. There are many reasons you want to modify as little as possible with an agent but the general motto is, only touch what you have to. Hence, we only rewrite classes which have been changed due to the addition of metrics and all other classes, even though scanned, are returned untouched to the classloader.
+As we allow the use of annotations to register metrics to track, if no black/white lists are defined we must scan all classes as they are loaded and check for the annotations. However, we do not want to have to rewrite all of these classes if we have not changed anything. There are many reasons you want to modify as little as possible with an agent but the general motto is, only touch what you have to. Hence, we only rewrite classes which have been changed due to the addition of metrics and all other classes, even though scanned, are returned untouched to the classloader.
+
 
 ## Supported Metrics Systems
 
@@ -212,9 +216,7 @@ Some differences in metric types exist between Prometheus and Dropwizard. In par
 
 Profiling agents can sometimes be far to heavy to attach to a JVM for a prolonged period of time and impact performance when we only want to monitor certain methods / hotspots. Also, most of the time these tools do not provide summary metrics exception counts which can be recorded with this library.
 
-### Configuration
-
-#### Metrics Configuration
+### Metric System Configuration
 
 The metric systems configuration is passed as simple key-value pairs `(Map<String,String>)` to the constructor of each MetricSystem via their provider. These key-values are defined in the "system" section of the agent configuration.
 
@@ -225,7 +227,6 @@ The metric systems configuration is passed as simple key-value pairs `(Map<Strin
         key1: value1
         
 The dropwizard implementation supports the property `domain` which allows to change the exposed JMX domain name. It defaults to the dropwizard default of `metrics`. See the next section for some shared properties around JVM level metrics.
-
        
 #### Adding JVM Level Metric Information
 
@@ -253,7 +254,7 @@ We start the default reporting methods on both metrics systems. For Dropwizard t
 
 Additional reporting systems can be added for each agent programatically if required.      
         
-#### Logger Configuration        
+### Logger Configuration        
 
 j.u.l is used for logging and can be configured by passing the agent argument `log-config:<properties path>` to the agent with the path to the logger properties file. 
 

@@ -49,12 +49,10 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
 
             cr.accept(cv, EXPAND_FRAMES);
 
-            //only modify what we have to - return original class definition if we don't change
-            if (MetricAdapter.MODIFIED_CLASS_CACHE.contains(className)) {
+            if (isClassModified(className)) {
                 return cw.toByteArray();
             }
 
-            return classfileBuffer;
         } catch (RuntimeException e) {
             if (propagateExceptions) {
                 throw e; //useful for testing & fail fast setups
@@ -65,5 +63,9 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
         }
 
         return classfileBuffer;
+    }
+
+    private boolean isClassModified(String className) {
+        return MetricAdapter.MODIFIED_CLASS_CACHE.contains(className);
     }
 }
