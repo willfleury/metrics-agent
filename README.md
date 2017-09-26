@@ -166,7 +166,7 @@ Labels are a concept in some reporting systems that allow for multi-dimensional 
 would result in a metric name in the Dropwizard registry of `taskx_total.value1.value2`.
 
 
-### Dynamic Label Values
+#### Dynamic Label Values
 
 A powerful feature is the ability to set label values dynamic based on variables available on the method stack. Metric names cannot be dynamic. The way we specify dynamic label values is using the `${index}` syntax followed by the method argument index. The special value `$this` can be used for referencing `this.toString()` in non static methods (i.e. where `this.` is valid).
  
