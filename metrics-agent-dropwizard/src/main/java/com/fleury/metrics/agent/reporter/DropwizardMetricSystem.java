@@ -28,7 +28,6 @@ public class DropwizardMetricSystem implements MetricSystem {
     public DropwizardMetricSystem(Map<String, Object> configuration) {
         this.configuration = configuration;
         addJVMMetrics(configuration);
-        startJmxReporter(configuration);
     }
 
     @Override
@@ -66,6 +65,24 @@ public class DropwizardMetricSystem implements MetricSystem {
     @Override
     public void recordTime(String name, String[] labelValues, long duration) {
         registry.timer(getMetricName(name, createSingleLabelValue(labelValues))).update(duration, TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public void startDefaultEndpoint() {
+        String domain = (String)configuration.get("domain");
+        if (domain == null) {
+            domain = "metrics";
+        }
+
+        LOGGER.fine("Starting JMX reporter at domain: " + domain);
+
+        JmxReporter
+                .forRegistry(registry)
+                .inDomain(domain)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .convertRatesTo(TimeUnit.MINUTES)
+                .build()
+                .start();
     }
 
     public static String getMetricName(String name, String label) {
@@ -110,22 +127,4 @@ public class DropwizardMetricSystem implements MetricSystem {
             registry.register("memory", new ClassLoadingGaugeSet());
         }
     }
-
-    private void startJmxReporter(Map<String, Object> configuration) {
-        String domain = (String)configuration.get("domain");
-        if (domain == null) {
-            domain = "metrics";
-        }
-
-        LOGGER.fine("Starting JMX reporter at domain: " + domain);
-
-        JmxReporter
-                .forRegistry(registry)
-                .inDomain(domain)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .convertRatesTo(TimeUnit.MINUTES)
-                .build()
-                .start();
-    }
-
 }

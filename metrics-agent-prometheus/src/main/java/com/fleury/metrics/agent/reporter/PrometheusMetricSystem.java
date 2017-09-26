@@ -12,14 +12,11 @@ import io.prometheus.client.hotspot.GarbageCollectorExports;
 import io.prometheus.client.hotspot.MemoryPoolsExports;
 import io.prometheus.client.hotspot.StandardExports;
 import io.prometheus.client.hotspot.ThreadExports;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -44,8 +41,6 @@ public class PrometheusMetricSystem implements MetricSystem {
         new StandardExports().register();
 
         addJVMMetrics(configuration);
-
-        addReporters(configuration);
     }
 
     @Override
@@ -128,6 +123,24 @@ public class PrometheusMetricSystem implements MetricSystem {
         }
     }
 
+    @Override
+    public void startDefaultEndpoint() {
+        int port = DEFAULT_HTTP_PORT;
+
+        if (configuration.containsKey("httpPort")) {
+            port = Integer.parseInt((String)configuration.get("httpPort"));
+        }
+
+        try {
+            LOGGER.fine("Starting Prometheus HttpServer on port " + port);
+
+            new HTTPServer(port);
+
+        } catch (Exception e) { //widen scope in case of ClassNotFoundException on non oracle/sun JVM
+            LOGGER.log(WARNING, "Unable to register Prometheus HttpServer on port " + port, e);
+        }
+    }
+
     private void addJVMMetrics(Map<String, Object> configuration) {
         if (!configuration.containsKey("jvm")) {
             return;
@@ -147,23 +160,6 @@ public class PrometheusMetricSystem implements MetricSystem {
 
         if (jvmMetrics.contains("classloader")) {
             new ClassLoadingExports().register();
-        }
-    }
-
-    private void addReporters(Map<String, Object> configuration) {
-        int port = DEFAULT_HTTP_PORT;
-
-        if (configuration.containsKey("httpPort")) {
-            port = Integer.parseInt((String)configuration.get("httpPort"));
-        }
-
-        try {
-            LOGGER.info("Starting Prometheus HttpServer on port " + port);
-
-            new HTTPServer(port);
-
-        } catch (Exception e) { //widen scope in case of ClassNotFoundException on non oracle/sun JVM
-            LOGGER.log(WARNING, "Unable to register Prometheus HttpServer on port " + port, e);
         }
     }
 

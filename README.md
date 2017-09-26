@@ -272,12 +272,12 @@ To enable each, simply add the metrics you want to a `jvm` property in the `syst
 
 #### Agent Reporting
 
-We start the default reporting methods on both metrics systems. For Dropwizard that is JMX (which can be scraped via other services), and for Prometheus that is the HttpServer. The default port for the Prometheus endpoint is `9899` and it can be changed by specifying the property `httpPort` in the system configuration section as follows
+We start the default reporting (endpoint) methods on both metrics systems. For Dropwizard that is JMX (which can be scraped via other services or agents), and for Prometheus that is the HttpServer. The default port for the Prometheus endpoint is `9899` and it can be changed by specifying the property `httpPort` in the system configuration section as follows
 
     system:
         httpPort: 9899
 
-Additional reporting systems can be added for each agent programatically if required.      
+Additional reporting systems can be added for each agent programatically if required. Alternatively an additional Java agent could be attached to send the JMX metrics to e.g. Graphite for Dropwizard. The benefit of this approach is that it doesn't care how many metric registries are started within the application or by the agent(s). 
         
 ### Logger Configuration        
 
@@ -311,7 +311,7 @@ The module metrics-agent-dist has build profiles for both Prometheus and Dropwiz
 
 	mvn clean package -Pdropwizard
 	
-The uber jar can be found under /target/metrics-agent.jar
+The uber jar can be found under `/target/metrics-agent.jar`
 
 # Usage
 

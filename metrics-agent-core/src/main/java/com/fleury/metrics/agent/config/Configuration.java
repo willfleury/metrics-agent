@@ -17,7 +17,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +31,7 @@ public class Configuration {
 
     private static final Logger LOGGER = Logger.getLogger(Configuration.class.getName());
 
-    public static String convertConfigClassNameToInternal(String name) {
+    public static String dotToSlash(String name) {
         return name.replaceAll("\\.", "/");
     }
 
@@ -120,9 +119,7 @@ public class Configuration {
     }
 
     public boolean isWhiteListed(String className) {
-        if (whiteList.isEmpty()) {
-            return true;
-        }
+        if (whiteList.isEmpty()) return true;
 
         for (String white : whiteList) {
             if (className.startsWith(white)) {
@@ -134,9 +131,7 @@ public class Configuration {
     }
 
     public boolean isBlackListed(String className) {
-        if (blackList.isEmpty()) {
-            return false;
-        }
+        if (blackList.isEmpty()) return false;
 
         for (String black : blackList) {
             if (className.startsWith(black)) {
@@ -214,7 +209,7 @@ public class Configuration {
 
         @Override
         public Object deserializeKey(final String key, final DeserializationContext ctxt) throws IOException {
-            String className = convertConfigClassNameToInternal(key.substring(0, key.lastIndexOf(".")));
+            String className = dotToSlash(key.substring(0, key.lastIndexOf(".")));
             String methodName = key.substring(key.lastIndexOf(".") + 1, key.length());
 
             return new Key(className, methodName);

@@ -1,6 +1,6 @@
 package com.fleury.metrics.agent.transformer.asm.injectors;
 
-import static com.fleury.metrics.agent.config.Configuration.convertConfigClassNameToInternal;
+import static com.fleury.metrics.agent.config.Configuration.dotToSlash;
 
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.reporter.Reporter;
@@ -44,7 +44,7 @@ public abstract class BaseMetricTest {
     }
 
     protected <T> Class<T> execute(Class<T> clazz, Configuration config) throws Exception {
-        String className = convertConfigClassNameToInternal(clazz.getName());
+        String className = dotToSlash(clazz.getName());
         String classAsPath = className + ".class";
 
         ClassFileTransformer cft = new AnnotatedMetricClassTransformer(config, true);

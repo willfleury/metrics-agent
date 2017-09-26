@@ -1,6 +1,6 @@
 package com.fleury.metrics.agent.transformer.asm.injectors;
 
-import static com.fleury.metrics.agent.config.Configuration.convertConfigClassNameToInternal;
+import static com.fleury.metrics.agent.config.Configuration.dotToSlash;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
@@ -14,7 +14,7 @@ public class WhiteBlackListTest extends BaseMetricTest {
     @Test
     public void allowWhiteListed() throws Exception {
         Configuration config = new Configuration();
-        List<String> whiteList = asList(convertConfigClassNameToInternal(CountedMethodClass.class.getName()));
+        List<String> whiteList = asList(dotToSlash(CountedMethodClass.class.getName()));
         config.setWhiteList(whiteList);
 
         Class<CountedMethodClass> clazz = execute(CountedMethodClass.class, config);
@@ -29,7 +29,7 @@ public class WhiteBlackListTest extends BaseMetricTest {
     @Test
     public void ignoreBlackListed() throws Exception {
         Configuration config = new Configuration();
-        List<String> blackList = asList(convertConfigClassNameToInternal(CountedMethodClass.class.getName()));
+        List<String> blackList = asList(dotToSlash(CountedMethodClass.class.getName()));
         config.setBlackList(blackList);
 
         Class<CountedMethodClass> clazz = execute(CountedMethodClass.class, config);

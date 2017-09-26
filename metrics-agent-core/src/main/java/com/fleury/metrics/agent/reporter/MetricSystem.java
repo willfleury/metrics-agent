@@ -22,4 +22,6 @@ public interface MetricSystem {
 
     void recordTime(String name, String[] labelValues, long duration);
 
+    void startDefaultEndpoint();
+
 }

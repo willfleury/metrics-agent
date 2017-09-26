@@ -62,6 +62,9 @@ public class TestMetricSystem implements MetricSystem {
         getOrAddTimer(timers, getName(name, createSingleLabelValue(labelValues))).add(duration);
     }
 
+    @Override
+    public void startDefaultEndpoint() { }
+
     public long getCount(String name) {
         return counters.containsKey(name) ? counters.get(name).get() : 0;
     }

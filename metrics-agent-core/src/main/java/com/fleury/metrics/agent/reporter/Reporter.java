@@ -18,6 +18,10 @@ public class Reporter {
 
     public static final MetricSystem METRIC_SYSTEM = MetricSystemProviderFactory.INSTANCE.createMetricSystem();
 
+    public static void startDefaultMetricEndpoint() {
+        METRIC_SYSTEM.startDefaultEndpoint();
+    }
+
     public static void registerMetrics(Collection<Metric> metrics) {
         for (Metric metric : metrics) {
             switch (metric.getType()) {
