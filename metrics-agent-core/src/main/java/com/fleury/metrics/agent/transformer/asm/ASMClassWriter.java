@@ -1,7 +1,6 @@
 package com.fleury.metrics.agent.transformer.asm;
 
 import static java.util.logging.Level.FINER;
-import static java.util.logging.Level.WARNING;
 
 import java.io.IOException;
 import java.io.InputStream;

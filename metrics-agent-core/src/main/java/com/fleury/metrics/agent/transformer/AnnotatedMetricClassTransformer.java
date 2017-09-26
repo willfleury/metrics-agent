@@ -7,7 +7,7 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.transformer.asm.ASMClassWriter;
-import com.fleury.metrics.agent.transformer.asm.MetricAdapter;
+import com.fleury.metrics.agent.transformer.asm.AnnotationClassVisitor;
 import com.fleury.metrics.agent.transformer.asm.MetricClassVisitor;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -44,12 +44,18 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
 
         try {
             ClassReader cr = new ClassReader(classfileBuffer);
-            ClassWriter cw = new ASMClassWriter(COMPUTE_FRAMES | COMPUTE_MAXS, loader);
-            ClassVisitor cv = new MetricClassVisitor(cw, config);
 
-            cr.accept(cv, EXPAND_FRAMES);
+            // Scan for annotations in a pre-pass phase so we have all the metric information we need when performing
+            // the actual instrumentation. This allows us to e.g. add Class Fields if desired for metrics which cannot
+            // be done otherwise (as visitAnnotation happens after visitFieldInsn in ClassVisitor).
+            scanMetricAnnotations(loader, cr);
 
-            if (isClassModified(className)) {
+            // rewrite only if metric found
+            if (config.isMetric(className)) {
+                ClassWriter cw = new ASMClassWriter(COMPUTE_FRAMES | COMPUTE_MAXS, loader);
+                ClassVisitor cv = new MetricClassVisitor(cw, config);
+                cr.accept(cv, EXPAND_FRAMES);
+
                 return cw.toByteArray();
             }
 
@@ -65,7 +71,7 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
         return classfileBuffer;
     }
 
-    private boolean isClassModified(String className) {
-        return MetricAdapter.MODIFIED_CLASS_CACHE.contains(className);
+    private void scanMetricAnnotations(ClassLoader loader, ClassReader cr) {
+        cr.accept(new AnnotationClassVisitor(new ASMClassWriter(0, loader), config), 0);
     }
 }

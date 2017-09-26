@@ -204,7 +204,7 @@ Note that we restrict the stack usage to the method arguments only. That is, we 
 public void callService(String client) 
 ```
 
-Each time this method is invoked it will use the value of the "client" parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep.
+Each time this method is invoked it will use the value of the `client` parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep.
 
 ### White & Black Lists
 
