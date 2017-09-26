@@ -5,7 +5,7 @@ import static java.util.logging.Level.WARNING;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
-import io.prometheus.client.Summary;
+import io.prometheus.client.Histogram;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.ClassLoadingExports;
 import io.prometheus.client.hotspot.GarbageCollectorExports;
@@ -29,7 +29,7 @@ public class PrometheusMetricSystem implements MetricSystem {
 
     private static final Map<String, Counter> COUNTERS = new ConcurrentHashMap<String, Counter>();
     private static final Map<String, Gauge> GAUGES = new ConcurrentHashMap<String, Gauge>();
-    private static final Map<String, Summary> SUMMARIES = new ConcurrentHashMap<String, Summary>();
+    private static final Map<String, Histogram> HISTOGRAMS = new ConcurrentHashMap<String, Histogram>();
 
     private static final int DEFAULT_HTTP_PORT = 9899;
     
@@ -65,12 +65,12 @@ public class PrometheusMetricSystem implements MetricSystem {
 
     @Override
     public void registerTimer(String name, String[] labels, String doc) {
-        Summary.Builder builder = Summary.build().name(name).help(doc);
+        Histogram.Builder builder = Histogram.build().name(name).help(doc);
         if (labels != null) {
             builder.labelNames(labels);
         }
 
-        SUMMARIES.put(name, builder.register());
+        HISTOGRAMS.put(name, builder.register());
     }
 
     @Override
@@ -115,7 +115,7 @@ public class PrometheusMetricSystem implements MetricSystem {
 
     @Override
     public void recordTime(String name, String[] labels, long duration) {
-        Summary summary = SUMMARIES.get(name);
+        Histogram summary = HISTOGRAMS.get(name);
         if (labels != null) {
             summary.labels(labels).observe(duration);
         } else {
@@ -166,7 +166,7 @@ public class PrometheusMetricSystem implements MetricSystem {
     void reset() {
         COUNTERS.clear();
         GAUGES.clear();
-        SUMMARIES.clear();
+        HISTOGRAMS.clear();
         CollectorRegistry.defaultRegistry.clear();
     }
 }
