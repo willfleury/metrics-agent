@@ -1,3 +1,28 @@
+- [Overview](#overview)
+  - [Motivation](#motivation)
+    - [Code Bloat](#code-bloat)
+  - [Instrumentation Metadata](#instrumentation-metadata)
+    - [Annotations](#annotations)
+    - [Configuration](#configuration)
+    - [Metric Labels](#metric-labels)
+      - [Dynamic Label Values](#dynamic-label-values)
+    - [White & Black Lists](#white-black-lists)
+    - [What we actually Transform](#what-we-actually-transform)
+  - [Supported Metrics Systems](#supported-metrics-systems)
+    - [Prometheus](#prometheus)
+    - [Dropwizard](#dropwizard)
+    - [Metric System Configuration](#metric-system-configuration)
+      - [Adding JVM Level Metric Information](#adding-jvm-level-metric-information)
+      - [Agent Reporting](#agent-reporting)
+    - [Logger Configuration](#logger-configuration)
+  - [Performance](#performance)
+  - [Dependencies](#dependencies)
+- [Binaries & Releases](#binaries-releases)
+- [Building](#building)
+- [Usage](#usage)
+- [Debugging](#debugging)
+
+
 # Overview
 
 ## Motivation
