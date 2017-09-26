@@ -26,14 +26,16 @@
 # Overview
 
 ## Motivation
-Agent based bytecode instrumentation is a far more elegant, faster and safer approach to instrumenting code on the JVM. Programatic addition of metrics into client code leads to severe code bloat and lack of clarity of the underlying business logic. 
+Agent based bytecode instrumentation is a far more elegant, faster and safer approach to instrumenting code on the JVM. Programmatic addition of metrics into client code leads to severe code bloat and lack of clarity of the underlying business logic. 
 
 The advantage of agent based bytecode instrumentation vs annotation driven using dependency injection (DI) frameworks like Spring and Guice is quite simple, you don't need to be using Spring or Guice to benefit from it. Another issue with such DI frameworks is that they can only code you they own the injection of which causes some headaches and you must still annotate or otherwise mark the locations to instrument in code. The agent doesn't care if the code you want to instrument is yours, a third party library or the JDK itself.
 
 The ability to simply update a configuration file indicating the metric and code location we want to measure, and simply restart the application to begin gathering measurements in that new location is invaluable and saves a considerable amount of developer time and results in faster performance debugging sessions.
 
+Finally, because this library provides a plugable provider interface, it means switching between different reporting systems does not need to be an ordeal. I've worked on projects that have had two or three different metrics libraries used and converters going between each to the backend monitoring system. Simply put, this is vile and makes code bloat even worse. All that is required is to write an implementation of the reporting system using your metric provider of choice. 
 
-### Code Bloat
+
+### Code Bloat Problem
 	
 Say we want to instrument a method which calls some third party library or service and tracks the number of failures (as exceptions thrown). To do this we need to track both the total number of method invocations and the number of failed invocations. Most of the time in modern Java libraries, exceptions are unchecked which allows them to propagate up to an appropriate handler without polluting the code base. 
 
@@ -46,7 +48,7 @@ public Result performSomeTask() {
 }
 ```
 
-To instrument this programatically we perform the following
+To instrument this programmatically we perform the following
 
 ```java
 // add class fields
@@ -104,7 +106,7 @@ With agent based instrumentation we can inject bytecode which results in the exa
 
 ## Instrumentation Metadata 
 
-For those who like marking methods to measure programatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition.
+For those who like marking methods to measure programmatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition.
 
 ### Annotations
 
@@ -277,7 +279,7 @@ We start the default reporting (endpoint) methods on both metrics systems. For D
     system:
         httpPort: 9899
 
-Additional reporting systems can be added for each agent programatically if required. Alternatively an additional Java agent could be attached to send the JMX metrics to e.g. Graphite for Dropwizard. The benefit of this approach is that it doesn't care how many metric registries are started within the application or by the agent(s). 
+Additional reporting systems can be added for each agent programmatically if required. Alternatively an additional Java agent could be attached to send the JMX metrics to e.g. Graphite for Dropwizard. The benefit of this approach is that it doesn't care how many metric registries are started within the application or by the agent(s). 
         
 ### Logger Configuration        
 
@@ -299,7 +301,7 @@ Very lightweight.
 The client libraries for whatever metric provider you choose are also included. Note that the final agent binaries are shaded and all dependencies relocated to prevent possible conflicts.
 
 
-# Binaries & Releases
+# <a name="binaries-releases"></a>Binaries & Releases
 
 See the releases section of the github repository for releases along with the prebuilt agent binaries for dropwizard and prometheus.
 
