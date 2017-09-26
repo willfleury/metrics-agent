@@ -32,7 +32,7 @@ The advantage of agent based bytecode instrumentation vs annotation driven using
 
 The ability to simply update a configuration file indicating the metric and code location we want to measure, and simply restart the application to begin gathering measurements in that new location is invaluable and saves a considerable amount of developer time and results in faster performance debugging sessions.
 
-Finally, because this library provides a plugable provider interface, it means switching between different reporting systems does not need to be an ordeal. I've worked on projects that have had two or three different metrics libraries used and converters going between each to the backend monitoring system. Simply put, this is vile and makes code bloat even worse. All that is required is to write an implementation of the reporting system using your metric provider of choice. 
+Finally, because this library provides a plugable provider interface, it means switching between different reporting systems does not need to be an ordeal. I've worked on projects that have had two or three different metrics libraries used and converters going between each to the backend monitoring system. Simply put, this is vile and makes code bloat even worse. With this library, if you wish to change provider, simply add an implementation of the provider of choice. As the metrics are not in the source code, there is no further change required and no technical debt added.
 
 
 ### Code Bloat Problem
@@ -106,7 +106,7 @@ With agent based instrumentation we can inject bytecode which results in the exa
 
 ## Instrumentation Metadata 
 
-For those who like marking methods to measure programmatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition.
+For those who like marking methods to measure programmatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition. We encourage the configuration driven approach over annotations.
 
 ### Annotations
 
