@@ -47,7 +47,7 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
 
             // Scan for annotations in a pre-pass phase so we have all the metric information we need when performing
             // the actual instrumentation. This allows us to e.g. add Class Fields if desired for metrics which cannot
-            // be done otherwise (as visitAnnotation happens after visitFieldInsn in ClassVisitor).
+            // be done otherwise (as visitMethod happens after visitField in ClassVisitor).
             scanMetricAnnotations(loader, cr);
 
             // rewrite only if metric found

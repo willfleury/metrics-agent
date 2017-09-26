@@ -50,10 +50,6 @@ public class MetricAdapter extends AdviceAdapter {
         }
     }
 
-    public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        super.visitFieldInsn(opcode, owner, name, desc);
-    }
-
     @Override
     protected void onMethodEnter() {
         if (metrics.isEmpty()) {
