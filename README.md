@@ -108,11 +108,14 @@ With agent based instrumentation we can inject bytecode which results in the exa
 
 For those who like marking methods to measure programmatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition. We encourage the configuration driven approach over annotations.
 
+How all the metric types are use should be self explanatory with the exception of Gauges. We use Gauges to track the number of invocations of a particular method or constructor that are `in flight`. That effectively means we increment the gauge value as the method enters and decrements it when it exits. This is very useful for things like Http Request Handlers etc where you want to know the number of in flight requests. 
+
+
 ### Annotations
 
 ```java
 @Counted (name = "", labels = { }, doc = "")
-@Gauged (name = "", mode=inc | dec, labels = { }, doc = "")
+@Gauged (name = "", mode=in_flight, labels = { }, doc = "")
 @Timed (name = "", labels = { }, doc = "")
 @ExceptionCounted (name = "", labels = { }, doc = "")
 ```

@@ -17,6 +17,7 @@ public class MetricClassVisitor extends RestrictedClassVisitor {
         super(cv, config);
     }
 
+    @Override
     public MethodVisitor visitAllowedMethod(MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
         List<Metric> metadata = config.findMetrics(className, name + desc);
 
