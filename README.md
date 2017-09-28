@@ -54,8 +54,8 @@ To instrument this programmatically we perform the following
 ```java
 // add class fields
 
-final Counter total = Metrics.createCounter("requests_total");
-final Counter failed = Metrics.createCounter("requests_failed");
+static final Counter total = Metrics.createCounter("requests_total");
+static final Counter failed = Metrics.createCounter("requests_failed");
 
 public Result performSomeTask() {
     total.inc();
@@ -78,9 +78,9 @@ Now lets add a timer to this also so we can see how long the method call takes.
 ```java
 // add class fields
 
-final Counter total = Metrics.createCounter("requests_total");
-final Counter failed = Metrics.createCounter("requests_failed");
-final Timer timer = Metrics.createTimer("requests_timer");
+static final Counter total = Metrics.createCounter("requests_total");
+static final Counter failed = Metrics.createCounter("requests_failed");
+static final Timer timer = Metrics.createTimer("requests_timer");
 
 public Result performSomeTask() {
     long startTime = System.nanoTime();
