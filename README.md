@@ -29,9 +29,9 @@
 ## Motivation
 Agent based bytecode instrumentation is a far more elegant, faster and safer approach to instrumenting code on the JVM. Programmatic addition of metrics into client code leads to severe code bloat and lack of clarity of the underlying business logic. 
 
-The advantage of agent based bytecode instrumentation vs annotation driven using dependency injection (DI) frameworks like Spring and Guice is quite simple, you don't need to be using Spring or Guice to benefit from it. Another issue with such DI frameworks is that they can only code you they own the injection of which causes some headaches and you must still annotate or otherwise mark the locations to instrument in code. The agent doesn't care if the code you want to instrument is yours, a third party library or the JDK itself.
+Annotation driven instrumentation using dependency injection frameworks such as Spring or Guice are an attempt to reduce the coat bloat caused by manual instrumentation. However, a clear advantage of agent based bytecode instrumentation is quite simple, you don't need to be using Spring or Guice to benefit from it. Another issue with such annotation driven DI frameworks is that they can only inject the logic on code you own and 3rd party libraries cannot be instrumented. The agent does not care if the code you want to instrument is yours, a third party library or the JDK itself.
 
-The ability to simply update a configuration file indicating the metric and code location we want to measure, and simply restart the application to begin gathering measurements in that new location is invaluable and saves a considerable amount of developer time and results in faster performance debugging sessions.
+The ability to quickly update a configuration file indicating the metrics and code locations we want to measure, and simply restart the application to begin gathering new measurements is invaluable. It saves a considerable amount of developer time and results in faster performance debugging sessions.
 
 Finally, because this library provides a plugable provider interface, it means switching between different reporting systems does not need to be an ordeal. I've worked on projects that have had two or three different metrics libraries used and converters going between each to the backend monitoring system. Simply put, this is vile and makes code bloat even worse. With this library, if you wish to change provider, simply add an implementation of the provider of choice. As the metrics are not in the source code, there is no further change required and no technical debt added.
 
@@ -54,8 +54,8 @@ To instrument this programmatically we perform the following
 ```java
 // add class fields
 
-final Counter total = Metrics.createCounter("requests_total");
-final Counter failed = Metrics.createCounter("requests_failed");
+static final Counter total = Metrics.createCounter("requests_total");
+static final Counter failed = Metrics.createCounter("requests_failed");
 
 public Result performSomeTask() {
     total.inc();
@@ -78,9 +78,9 @@ Now lets add a timer to this also so we can see how long the method call takes.
 ```java
 // add class fields
 
-final Counter total = Metrics.createCounter("requests_total");
-final Counter failed = Metrics.createCounter("requests_failed");
-final Timer timer = Metrics.createTimer("requests_timer");
+static final Counter total = Metrics.createCounter("requests_total");
+static final Counter failed = Metrics.createCounter("requests_failed");
+static final Timer timer = Metrics.createTimer("requests_timer");
 
 public Result performSomeTask() {
     long startTime = System.nanoTime();
@@ -102,12 +102,12 @@ public Result performSomeTask() {
 		
 WOW! That turned ugly fast! We started with 3 LOC (lines of code) representing the business logic and ended up with 17 LOC, 14 of which were due to our metrics. This has the potential to destroy the clarity of a code base.
 
-With agent based instrumentation we can inject bytecode which results in the exact same method bytecode as would be produced by writing and compiling the final metric example, but without touching the source.
+With agent based instrumentation, we can inject the exact same method bytecode as would be produced by writing it manually, but without touching the source.
 
 
 ## Instrumentation Metadata 
 
-For those who like marking methods to measure programmatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition. We encourage the configuration driven approach over annotations.
+For those who like marking methods to measure programmatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml format file. We encourage the configuration driven approach over annotations.
 
 How all the metric types are use should be self explanatory with the exception of Gauges. We use Gauges to track the number of invocations of a particular method or constructor that are `in flight`. That effectively means we increment the gauge value as the method enters and decrements it when it exits. This is very useful for things like Http Request Handlers etc where you want to know the number of in flight requests. 
 
@@ -208,7 +208,7 @@ Note that we restrict the stack usage to the method arguments only. That is, we 
 public void callService(String client) 
 ```
 
-Each time this method is invoked it will use the value of the `client` parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep.
+Each time this method is invoked it will use the value of the `client` parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep. As we use `PropertyUtils` from the `commons-beanutils` library to perform the nested property reading, the method must obey the JavaBeans spec. It should be relatively easy to add support for new BeanIntrospectors to support non JavaBean nested lookup.
 
 
 ### What we actually Transform

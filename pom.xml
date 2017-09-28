@@ -17,9 +17,10 @@
         <asm.version>5.1</asm.version>
         <prometheus.version>0.0.26</prometheus.version>
         <jackson.version>2.4.0</jackson.version>
-        <commons.beanutils>1.9.3</commons.beanutils>
+        <commons.beanutils.version>1.9.3</commons.beanutils.version>
 
         <junit.version>4.11</junit.version>
+        <commons.io.version>2.5</commons.io.version>
     </properties>
 
 

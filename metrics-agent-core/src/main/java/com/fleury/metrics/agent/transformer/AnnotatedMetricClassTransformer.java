@@ -50,8 +50,8 @@ public class AnnotatedMetricClassTransformer implements ClassFileTransformer {
             // be done otherwise (as visitMethod happens after visitField in ClassVisitor).
             scanMetricAnnotations(loader, cr);
 
-            // rewrite only if metric found
-            if (config.isMetric(className)) {
+            // rewrite only if metric found & class allowed
+            if (config.isMetric(className) && config.isWhiteListed(className) && !config.isBlackListed(className)) {
                 ClassWriter cw = new ASMClassWriter(COMPUTE_FRAMES | COMPUTE_MAXS, loader);
                 ClassVisitor cv = new MetricClassVisitor(cw, config);
                 cr.accept(cv, EXPAND_FRAMES);

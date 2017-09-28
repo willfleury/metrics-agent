@@ -8,7 +8,6 @@ import com.fleury.metrics.agent.model.Metric;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 import org.junit.Test;
 
 /**
@@ -16,8 +15,6 @@ import org.junit.Test;
  * @author Will Fleury
  */
 public class ConfigurationTest {
-
-    private static final Logger LOGGER = Logger.getLogger(ConfigurationTest.class.getName());
 
     @Test
     public void testParseMetricsConfig() {

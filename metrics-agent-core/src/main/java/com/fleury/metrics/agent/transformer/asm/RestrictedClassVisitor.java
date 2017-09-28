@@ -34,8 +34,7 @@ public abstract class RestrictedClassVisitor extends ClassVisitor {
 
         boolean isSyntheticMethod = (access & ACC_SYNTHETIC) != 0;
 
-        if (!isInterface && !isSyntheticMethod && mv != null &&
-                config.isWhiteListed(className) && !config.isBlackListed(className)) {
+        if (!isInterface && !isSyntheticMethod && mv != null) {
             mv = visitAllowedMethod(mv, access, name, desc, signature, exceptions);
         }
 

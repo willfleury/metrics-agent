@@ -13,7 +13,7 @@ public class SyntheticMethodsTest extends BaseMetricTest {
 
     /**
      *
-     * The following generics results in two methods with the same name in the CountedMethodClass bytecode.. This
+     * The following generics results in two methods with the same annotation in the CountedMethodClass bytecode.. This
      * confused the annotation scanning as annotations are placed on both the real and synthetic method.. Therefore need
      * to check the method access code to ensure its not synthetic.
      *

@@ -21,7 +21,7 @@ public @interface Gauged {
 
     String name();
 
-    mode mode();
+    mode mode() default mode.in_flight;
 
     String[] labels() default {};
 
