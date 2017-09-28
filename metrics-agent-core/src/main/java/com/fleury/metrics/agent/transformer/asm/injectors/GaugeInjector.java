@@ -14,7 +14,9 @@ public class GaugeInjector extends AbstractInjector {
 
     private static final String INC_METHOD = "recordGaugeInc";
     private static final String DEC_METHOD = "recordGaugeDec";
-    private static final String SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;)V";
+    private static final String SIGNATURE = Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.getType(String.class), Type.getType(String[].class));
 
     private final Metric metric;
     

@@ -12,7 +12,9 @@ import org.objectweb.asm.commons.AdviceAdapter;
 public class ExceptionCounterInjector extends AbstractInjector {
 
     private static final String METHOD = "recordCount";
-    private static final String SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;)V";
+    private static final String SIGNATURE = Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.getType(String.class), Type.getType(String[].class));
     
     private final Metric metric;
     
