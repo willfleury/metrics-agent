@@ -8,6 +8,7 @@
       - [Dynamic Label Values](#dynamic-label-values)
     - [White & Black Lists](#white-black-lists)
     - [What we actually Transform](#what-we-actually-transform)
+    - [Supported Languages](#supported-languages)
   - [Supported Metrics Systems](#supported-metrics-systems)
     - [Prometheus](#prometheus)
     - [Dropwizard](#dropwizard)
@@ -228,6 +229,28 @@ To black list a class or package add the fully qualified class or package name u
 ### What we actually Transform
 As we allow the use of annotations to register metrics to track, if no black/white lists are defined we must scan all classes as they are loaded and check for the annotations. However, we do not want to have to rewrite all of these classes if we have not changed anything. There are many reasons you want to modify as little as possible with an agent but the general motto is, only touch what you have to. Hence, we only rewrite classes which have been changed due to the addition of metrics and all other classes, even though scanned, are returned untouched to the classloader.
 
+### Supported Languages
+As the agent works at the bytecode level, we support any language which runs on the JVM. Every language which compiles and runs on the JVM must obey by the bytecode rules. This simply means we need to understand the translation mechanisms of each language for the language level method name to the bytecode level. In Java this is usually 1:1 (excluding some generics fun). You can always examine the `javap` (the [Java Disassembler](http://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html)) command to view the bytecode contents in a more `Java` centric way.
+
+As an example. Lets take the followin Scala class 
+```scala
+class Person(val name:String) {
+}
+```
+If we run `javap` on this
+
+    javap Person.class
+    
+we get
+
+    Compiled from "Person.scala"
+    public class Person {
+      private final java.lang.String name;   // field
+      public java.lang.String name();        // getter method
+      public Person(java.lang.String);       // constructor
+    }
+
+You can do the same for Kotlin, Clojure and any other JVM language. Be aware that there may be some quirks in the naming translations and it may not always be as simple as shown above.
 
 ## Supported Metrics Systems
 
