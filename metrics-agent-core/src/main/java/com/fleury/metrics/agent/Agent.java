@@ -1,12 +1,13 @@
 package com.fleury.metrics.agent;
 
+import static com.fleury.metrics.agent.config.LoggerUtil.initializeLogging;
+
 import com.fleury.metrics.agent.config.ArgParser;
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.reporter.MetricSystemProviderFactory;
 import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.transformer.AnnotatedMetricClassTransformer;
 import java.lang.instrument.Instrumentation;
-import java.util.logging.LogManager;
 
 /**
  *
@@ -28,15 +29,6 @@ public class Agent {
                 instrumentation.isRetransformClassesSupported());
 
         startDefaultMetricEndpoint();
-    }
-
-    private static void initializeLogging(String resource) {
-        try {
-            LogManager.getLogManager().readConfiguration(
-                    Agent.class.getResourceAsStream(resource));
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to initialize agent logging with config: " + resource);
-        }
     }
 
     private static void startDefaultMetricEndpoint() {
