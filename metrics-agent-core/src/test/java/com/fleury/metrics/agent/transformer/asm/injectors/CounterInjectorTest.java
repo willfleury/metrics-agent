@@ -31,9 +31,11 @@ public class CounterInjectorTest extends BaseMetricTest {
 
     @Test
     public void shouldCountConstructorInvocationWithConfiguration() throws Exception {
-        Metric meta = new Metric(MetricType.Counted);
-        meta.setName("constructor");
-        meta.setLabels(Arrays.asList("label1:value1"));
+        Metric meta = Metric.builder()
+                .withType(MetricType.Counted)
+                .withName("constructor")
+                .withLabels(Arrays.asList("label1:value1"))
+                .createMetric();
 
         Configuration.Key key = new Configuration.Key(
                 Type.getType(ConfigurationCountedConstructorClass.class).getInternalName(),

@@ -1,15 +1,10 @@
 package com.fleury.metrics.agent.transformer.asm;
 
+import static com.fleury.metrics.agent.transformer.asm.util.AnnotationUtil.checkSignature;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 import com.fleury.metrics.agent.config.Configuration;
-import com.fleury.metrics.agent.model.AnnotationScanner;
-import com.fleury.metrics.agent.model.Metric;
 import com.fleury.metrics.agent.model.MetricType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 
@@ -20,8 +15,6 @@ import org.objectweb.asm.MethodVisitor;
  */
 public class AnnotationMethodVisitor extends MethodVisitor {
 
-    private final Map<MetricType, Metric> metrics = new HashMap<MetricType, Metric>();
-    private final AnnotationScanner annotationScanner;
     private final Configuration config;
     private final String className;
     private final String methodName;
@@ -34,26 +27,16 @@ public class AnnotationMethodVisitor extends MethodVisitor {
         this.className = className;
         this.methodName = name;
         this.methodDesc = desc;
-
-        this.annotationScanner = new AnnotationScanner(metrics);
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        Metric metric = annotationScanner.checkSignature(desc);
+        MetricType metricType = checkSignature(desc);
 
-        if (metric != null) {
+        if (metricType != null) {
             Configuration.Key key = new Configuration.Key(className, methodName + methodDesc);
-            List<Metric> metrics = config.getMetrics().get(key);
 
-            if (metrics == null) {
-                metrics = new ArrayList<Metric>();
-                config.getMetrics().put(key, metrics);
-            }
-
-            metrics.add(metric);
-
-            return new MetricAnnotationAttributeVisitor(super.visitAnnotation(desc, visible), metric);
+            return new MetricAnnotationAttributeVisitor(super.visitAnnotation(desc, visible), metricType, config, key);
         }
 
         return super.visitAnnotation(desc, visible);

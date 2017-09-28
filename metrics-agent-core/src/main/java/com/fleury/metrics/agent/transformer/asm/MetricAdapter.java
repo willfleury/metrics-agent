@@ -1,5 +1,6 @@
 package com.fleury.metrics.agent.transformer.asm;
 
+import static com.fleury.metrics.agent.model.Metric.mapByType;
 import static java.util.logging.Level.FINE;
 
 import com.fleury.metrics.agent.model.LabelUtil;
@@ -9,7 +10,6 @@ import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.transformer.asm.injectors.Injector;
 import com.fleury.metrics.agent.transformer.asm.injectors.InjectorFactory;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -25,7 +25,7 @@ public class MetricAdapter extends AdviceAdapter {
 
     private static final Logger LOGGER = Logger.getLogger(AdviceAdapter.class.getName());
 
-    private final Map<MetricType, Metric> metrics = new HashMap<MetricType, Metric>();
+    private final Map<MetricType, Metric> metrics;
     private final Type[] argTypes;
     private final String className;
     private final String methodName;
@@ -40,14 +40,7 @@ public class MetricAdapter extends AdviceAdapter {
         this.methodName = name;
         this.argTypes = Type.getArgumentTypes(desc);
         this.access = access;
-
-        registerConfigurationMetrics(metadata);
-    }
-
-    private void registerConfigurationMetrics(List<Metric> configMetrics) {
-        for (Metric metric : configMetrics) {
-            metrics.put(metric.getType(), metric);
-        }
+        this.metrics = mapByType(metadata);
     }
 
     @Override
