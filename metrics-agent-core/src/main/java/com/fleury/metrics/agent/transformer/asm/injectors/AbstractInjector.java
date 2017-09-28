@@ -5,12 +5,14 @@ import static com.fleury.metrics.agent.model.LabelUtil.getNestedLabelVar;
 import static com.fleury.metrics.agent.model.LabelUtil.isLabelVarNested;
 import static com.fleury.metrics.agent.model.LabelUtil.isTemplatedLabelValue;
 import static com.fleury.metrics.agent.model.LabelUtil.isThis;
+import static com.fleury.metrics.agent.transformer.asm.util.CollectionUtil.isNotEmpty;
 
 import com.fleury.metrics.agent.model.LabelUtil;
 import com.fleury.metrics.agent.model.Metric;
 import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.transformer.asm.util.OpCodeUtil;
 import java.util.List;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
@@ -52,7 +54,7 @@ public abstract class AbstractInjector implements Injector, Opcodes {
 
         List<String> labelValues = LabelUtil.getLabelValues(metric.getLabels());
 
-        if (labelValues != null && !labelValues.isEmpty()) {
+        if (isNotEmpty(labelValues)) {
             int labelVar = injectLabelValuesArrayToStack(metric, labelValues);
 
             aa.visitVarInsn(ALOAD, nameVar);
@@ -102,14 +104,20 @@ public abstract class AbstractInjector implements Injector, Opcodes {
             if (isLabelVarNested(labelValue)) {
                 aa.visitLdcInsn(getNestedLabelVar(labelValue));
 
-                aa.visitMethodInsn(INVOKESTATIC, "org/apache/commons/beanutils/PropertyUtils",
+                aa.visitMethodInsn(INVOKESTATIC, Type.getInternalName(PropertyUtils.class),
                         "getNestedProperty",
-                        "(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;", false);
+                        Type.getMethodDescriptor(
+                                Type.getType(Object.class),
+                                Type.getType(Object.class), Type.getType(String.class)),
+                        false);
             }
 
-            aa.visitMethodInsn(INVOKESTATIC, "java/lang/String",
+            aa.visitMethodInsn(INVOKESTATIC, Type.getInternalName(String.class),
                     "valueOf",
-                    "(Ljava/lang/Object;)Ljava/lang/String;", false);
+                    Type.getMethodDescriptor(
+                            Type.getType(String.class),
+                            Type.getType(Object.class)),
+                    false);
         }
        
         aa.visitInsn(AASTORE);

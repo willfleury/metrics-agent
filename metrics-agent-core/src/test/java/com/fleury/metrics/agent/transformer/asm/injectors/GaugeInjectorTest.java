@@ -1,9 +1,12 @@
 package com.fleury.metrics.agent.transformer.asm.injectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.fleury.metrics.agent.annotation.Gauged;
 import com.fleury.metrics.agent.annotation.Gauged.mode;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 
 /**
@@ -13,48 +16,153 @@ import org.junit.Test;
 public class GaugeInjectorTest extends BaseMetricTest {
 
     @Test
-    public void shouldIncrementGaugedConstructorInvocation() throws Exception {
-        Class<GaugedConstructorClass> clazz = execute(GaugedConstructorClass.class);
+    public void shouldMeasureConstructorInFlight() throws Exception {
+        final Class<GaugedConstructorClass> clazz = execute(GaugedConstructorClass.class);
 
-        Object obj = clazz.newInstance();
+        final CountDownLatch inProgressLatch = new CountDownLatch(1);
+        final CountDownLatch callFinishedLatch = new CountDownLatch(1);
 
-        assertEquals(1, metrics.getCount("constructor"));
+        startInNewThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    clazz.getConstructor(CountDownLatch.class).newInstance(inProgressLatch);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    callFinishedLatch.countDown();
+                }
+            }
+        });
+
+        Thread.sleep(500); //wait to init thread creating new instance above
+
+        assertEquals(1, metrics.getCount("constructor_initializing"));
+
+        //allow request to finish
+        inProgressLatch.countDown();
+
+        callFinishedLatch.await();
+
+        //constructor has finished - so no in flight
+        assertEquals(0, metrics.getCount("constructor_initializing"));
     }
 
     @Test
-    public void shouldIncrementAndDecrementOnMethodInvocation() throws Exception {
-        Class<GaugedMethodClass> clazz = execute(GaugedMethodClass.class);
+    public void shouldMeasureConstructorInFlightWithException() throws Exception {
+        final Class<GaugedConstructorExceptionClass> clazz = execute(GaugedConstructorExceptionClass.class);
 
-        Object obj = clazz.newInstance();
+        final CountDownLatch inProgressLatch = new CountDownLatch(1);
+        final CountDownLatch callFinishedLatch = new CountDownLatch(1);
+        final AtomicBoolean exceptionOccurred = new AtomicBoolean(false);
 
-        obj.getClass().getMethod("incrementOnMethod").invoke(obj);
+        startInNewThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    try {
+                        clazz.getConstructor(CountDownLatch.class).newInstance(inProgressLatch);
+                    } catch (Exception e) {
+                        if (e.getCause().getMessage().equals("Something bad..")) {
+                            exceptionOccurred.set(true);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    callFinishedLatch.countDown();
+                }
+            }
+        });
+
+        Thread.sleep(500); //wait to init thread creating new instance above
+
+        assertEquals(1, metrics.getCount("constructor_initializing"));
+
+        //allow request to finish
+        inProgressLatch.countDown();
+
+        callFinishedLatch.await();
+
+        //constructor has finished - so not in flight
+        assertEquals(0, metrics.getCount("constructor_initializing"));
+        assertTrue(exceptionOccurred.get());
+    }
+
+    @Test
+    public void shouldMeasureMethodInFlight() throws Exception {
+        final Class<GaugedMethodClass> clazz = execute(GaugedMethodClass.class);
+
+        final CountDownLatch inProgressLatch = new CountDownLatch(1);
+        final CountDownLatch callFinishedLatch = new CountDownLatch(1);
+
+        startInNewThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Object obj = clazz.newInstance();
+                    obj.getClass().getMethod("handleRequest", CountDownLatch.class).invoke(obj, inProgressLatch);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    callFinishedLatch.countDown();
+                }
+            }
+        });
+
+        Thread.sleep(500); //wait for init above and request method call
 
         assertEquals(1, metrics.getCount("request_handler"));
 
-        obj.getClass().getMethod("decrementOnMethod").invoke(obj);
+        //allow request to finish
+        inProgressLatch.countDown();
 
-        assertEquals(0, metrics.getCount("request_handler"));
+        callFinishedLatch.await();
+
+        //request has finished - so no in flight
+        assertEquals(0, metrics.getCount("constructor_initializing"));
     }
 
     public static class GaugedConstructorClass {
 
-        @Gauged(name = "constructor", mode = mode.inc)
-        public GaugedConstructorClass() {
-            BaseMetricTest.performBasicTask();
+        @Gauged(name = "constructor_initializing", mode = mode.in_flight)
+        public GaugedConstructorClass(CountDownLatch latch) {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static class GaugedConstructorExceptionClass {
+
+        @Gauged(name = "constructor_initializing", mode = mode.in_flight)
+        public GaugedConstructorExceptionClass(CountDownLatch latch) {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            throw new RuntimeException("Something bad..");
         }
     }
 
     public static class GaugedMethodClass {
 
-        @Gauged(name = "request_handler", mode = mode.inc)
-        public void incrementOnMethod() {
-            BaseMetricTest.performBasicTask();
+        @Gauged(name = "request_handler", mode = mode.in_flight)
+        public void handleRequest(CountDownLatch latch) {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
+    }
 
-        @Gauged(name = "request_handler", mode = mode.dec)
-        public void decrementOnMethod() {
-            BaseMetricTest.performBasicTask();
-        }
+    private void startInNewThread(Runnable r) {
+        new Thread(r).start();
     }
 
 }

@@ -12,10 +12,14 @@ import org.objectweb.asm.commons.AdviceAdapter;
 public class TimedExceptionCountedInjector extends AbstractInjector {
     
     private static final String EXCEPTION_COUNT_METHOD = "recordCount";
-    private static final String EXCEPTION_COUNT_SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;)V";
-    
+    private static final String EXCEPTION_COUNT_SIGNATURE = Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.getType(String.class), Type.getType(String[].class));
+
     private static final String TIMER_METHOD = "recordTime";
-    private static final String TIMER_SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;J)V";
+    private static final String TIMER_SIGNATURE = Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.getType(String.class), Type.getType(String[].class), Type.LONG_TYPE);
     
     private final Metric timerMetric;
     private final Metric exceptionMetric;

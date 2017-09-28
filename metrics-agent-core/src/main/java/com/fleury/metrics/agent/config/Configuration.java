@@ -89,6 +89,16 @@ public class Configuration {
         this.metrics = metrics;
     }
 
+    public boolean isMetric(String className) {
+        for (Key key : metrics.keySet()) {
+            if (key.className.equals(className)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public List<Metric> findMetrics(String className, String method) {
         Key key = new Key(className, method);
         return metrics.containsKey(key) ? metrics.get(key) : Collections.<Metric>emptyList();

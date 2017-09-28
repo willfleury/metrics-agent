@@ -12,7 +12,9 @@ import org.objectweb.asm.commons.AdviceAdapter;
 public class TimerInjector extends AbstractInjector {
 
     private static final String METHOD = "recordTime";
-    private static final String SIGNATURE = "(Ljava/lang/String;[Ljava/lang/String;J)V";
+    private static final String SIGNATURE = Type.getMethodDescriptor(
+            Type.VOID_TYPE,
+            Type.getType(String.class), Type.getType(String[].class), Type.LONG_TYPE);
 
     private final Metric metric;
     

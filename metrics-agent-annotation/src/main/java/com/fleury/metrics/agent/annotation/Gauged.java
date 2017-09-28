@@ -15,9 +15,8 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.CONSTRUCTOR, ElementType.METHOD})
 public @interface Gauged {
 
-    public static enum mode {
-
-        inc, dec
+    enum mode {
+        in_flight
     }
 
     String name();

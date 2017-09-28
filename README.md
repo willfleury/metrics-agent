@@ -8,6 +8,7 @@
       - [Dynamic Label Values](#dynamic-label-values)
     - [White & Black Lists](#white-black-lists)
     - [What we actually Transform](#what-we-actually-transform)
+    - [Supported Languages](#supported-languages)
   - [Supported Metrics Systems](#supported-metrics-systems)
     - [Prometheus](#prometheus)
     - [Dropwizard](#dropwizard)
@@ -108,11 +109,14 @@ With agent based instrumentation we can inject bytecode which results in the exa
 
 For those who like marking methods to measure programmatically, we provide annotations to do just that. We also provide a configuration driven system where you define the methods you want to instrument in a yaml definition. We encourage the configuration driven approach over annotations.
 
+How all the metric types are use should be self explanatory with the exception of Gauges. We use Gauges to track the number of invocations of a particular method or constructor that are `in flight`. That effectively means we increment the gauge value as the method enters and decrements it when it exits. This is very useful for things like Http Request Handlers etc where you want to know the number of in flight requests. 
+
+
 ### Annotations
 
 ```java
 @Counted (name = "", labels = { }, doc = "")
-@Gauged (name = "", mode=inc | dec, labels = { }, doc = "")
+@Gauged (name = "", mode=in_flight, labels = { }, doc = "")
 @Timed (name = "", labels = { }, doc = "")
 @ExceptionCounted (name = "", labels = { }, doc = "")
 ```
@@ -204,7 +208,7 @@ Note that we restrict the stack usage to the method arguments only. That is, we 
 public void callService(String client) 
 ```
 
-Each time this method is invoked it will use the value of the "client" parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep.
+Each time this method is invoked it will use the value of the `client` parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep.
 
 ### White & Black Lists
 
@@ -225,6 +229,28 @@ To black list a class or package add the fully qualified class or package name u
 ### What we actually Transform
 As we allow the use of annotations to register metrics to track, if no black/white lists are defined we must scan all classes as they are loaded and check for the annotations. However, we do not want to have to rewrite all of these classes if we have not changed anything. There are many reasons you want to modify as little as possible with an agent but the general motto is, only touch what you have to. Hence, we only rewrite classes which have been changed due to the addition of metrics and all other classes, even though scanned, are returned untouched to the classloader.
 
+### Supported Languages
+As the agent works at the bytecode level, we support any language which runs on the JVM. Every language which compiles and runs on the JVM must obey by the bytecode rules. This simply means we need to understand the translation mechanisms of each language for the language level method name to the bytecode level. In Java this is usually 1:1 (excluding some generics fun). You can always examine the `javap` (the [Java Disassembler](http://docs.oracle.com/javase/7/docs/technotes/tools/windows/javap.html)) command to view the bytecode contents in a more `Java` centric way.
+
+As an example. Lets take the followin Scala class 
+```scala
+class Person(val name:String) {
+}
+```
+If we run `javap` on this
+
+    javap Person.class
+    
+we get
+
+    Compiled from "Person.scala"
+    public class Person {
+      private final java.lang.String name;   // field
+      public java.lang.String name();        // getter method
+      public Person(java.lang.String);       // constructor
+    }
+
+You can do the same for Kotlin, Clojure and any other JVM language. Be aware that there may be some quirks in the naming translations and it may not always be as simple as shown above.
 
 ## Supported Metrics Systems
 
@@ -287,10 +313,10 @@ j.u.l is used for logging and can be configured by passing the agent argument `l
 
 
 ## Performance
-We use the Java ASM bytecode manipulation library. This is the lowest level and fastest of all the bytecode libraries which is used by the likes of cglib. It allows us to inject bytecode in a precise way which means we can craft the exact same bytecode as if it was hand written. To make the metric system plugable, we chose to abstract the metric work behind a generic SPI interface. The bytecode which we inject uses the SPI which can in turn be swapped out without any change to our bytecode. This makes it very flexible but it comes at the cost of not being able to keep field level static variable references for our metrics. Instead we perform a lookup from a ConcurrentHashMap to get the metric by name in the SPIs. Note that JIT takes care of the additional method dispatches up to the Map by performing inlining. If we were using a single implementation we would inject the metrics fields as static variables at the top of each class. If someone wishes to fork this for a single metric system that would be the best way to go.
+We use the Java ASM bytecode manipulation library. This is the lowest level and fastest of all the bytecode libraries which is used by the likes of cglib. It allows us to inject bytecode in a precise way which means we can craft the exact same bytecode as if it was hand written. To make the metric system plugable, we chose to abstract the metric work behind a generic SPI interface. The bytecode which we inject uses the SPI which can in turn be swapped out without any change to our bytecode. This makes it very flexible but it comes at the cost of not being able to keep field level static variable references for our metrics. Instead we perform a lookup from a ConcurrentHashMap to get the metric by name in the SPIs. Note that JIT takes care of the additional method dispatches up to the Map by performing inlining. If we were using a single implementation we would inject the metrics fields as static variables at the top of each class. If someone wishes to fork this for a single metric system that would be the best way to go. See the Prometheus fork implementation for an example [https://github.com/willfleury/prometheus-metrics-agent](https://github.com/willfleury/prometheus-metrics-agent).
 
 It should be noted that as with hand crafted metrics, the additional bytecode and hence method size required to handle capturing all metrics could potentially lead to methods which might otherwise have been inlined or compiled by the JIT being skipped instead. This should be considered regardless off the instrumentation choice and if unsure, the appropriate JVM output should be checked (-XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining -XX:+PrintCompilation).
- 
+
 
 ## Dependencies 
 Very lightweight.
