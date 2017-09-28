@@ -12,13 +12,14 @@ public class LoggerUtil {
         InputStream in = null;
         try {
             in = Agent.class.getResourceAsStream(resource);
+
             if (in == null) {
                 throw new NullPointerException("Logger configuration " + resource + " not found");
             }
 
             LogManager.getLogManager().readConfiguration(in);
-        } catch (Exception ignored) {
-            throw new RuntimeException("Unable to initialize agent logging with config: " + resource);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to initialize agent logging with config: " + resource, e);
         } finally {
             if (in != null) {
                 try {
@@ -28,3 +29,4 @@ public class LoggerUtil {
         }
     }
 }
+
