@@ -6,7 +6,6 @@
     - [Configuration](#configuration)
     - [Metric Labels](#metric-labels)
       - [Dynamic Label Values](#dynamic-label-values)
-    - [White & Black Lists](#white-black-lists)
     - [What we actually Transform](#what-we-actually-transform)
     - [Supported Languages](#supported-languages)
   - [Supported Metrics Systems](#supported-metrics-systems)
@@ -15,6 +14,7 @@
     - [Metric System Configuration](#metric-system-configuration)
       - [Adding JVM Level Metric Information](#adding-jvm-level-metric-information)
       - [Agent Reporting](#agent-reporting)
+    - [Black & Black Lists](#black-and-white-lists)
     - [Logger Configuration](#logger-configuration)
   - [Performance](#performance)
   - [Dependencies](#dependencies)
@@ -210,21 +210,6 @@ public void callService(String client)
 
 Each time this method is invoked it will use the value of the `client` parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep.
 
-### White & Black Lists
-
-Sometimes we only want to scan certain packages or classes which we wish to instrument. This could be to reduce the agent startup time or to work around problematic instrumentation situations. Note that the black and white lists do not take any annotations or metric configuration into account and essentially override them.
-
-To white list a class or package include the fully qualified class or package name under the `whiteList` property. If no white list is specified, then all classes are scanned and eligible for transforming. 
-
-    whiteList:
-      - com/fleury/test/ClassName
-      - com/fleury/package2
-        
-To black list a class or package add the fully qualified class or package name under the `blackList` property. If a class or package is in both white and black list, the black list wins and the class will not be touched.
-
-    blackList:
-       - com/
-
 
 ### What we actually Transform
 As we allow the use of annotations to register metrics to track, if no black/white lists are defined we must scan all classes as they are loaded and check for the annotations. However, we do not want to have to rewrite all of these classes if we have not changed anything. There are many reasons you want to modify as little as possible with an agent but the general motto is, only touch what you have to. Hence, we only rewrite classes which have been changed due to the addition of metrics and all other classes, even though scanned, are returned untouched to the classloader.
@@ -306,6 +291,22 @@ We start the default reporting (endpoint) methods on both metrics systems. For D
         httpPort: 9899
 
 Additional reporting systems can be added for each agent programmatically if required. Alternatively an additional Java agent could be attached to send the JMX metrics to e.g. Graphite for Dropwizard. The benefit of this approach is that it doesn't care how many metric registries are started within the application or by the agent(s). 
+
+
+### <a name="black-and-white-lists"></a>Black & Black Lists
+
+Sometimes we only want to scan certain packages or classes which we wish to instrument. This could be to reduce the agent startup time or to work around problematic instrumentation situations. Note that the black and white lists do not take any annotations or metric configuration into account and essentially override them.
+
+To white list a class or package include the fully qualified class or package name under the `whiteList` property. If no white list is specified, then all classes are scanned and eligible for transforming. 
+
+    whiteList:
+      - com/fleury/test/ClassName
+      - com/fleury/package2
+        
+To black list a class or package add the fully qualified class or package name under the `blackList` property. If a class or package is in both white and black list, the black list wins and the class will not be touched.
+
+    blackList:
+       - com/
         
 ### Logger Configuration        
 
