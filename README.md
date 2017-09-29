@@ -199,16 +199,16 @@ would result in a metric name in the Dropwizard registry of `taskx_total.value1.
 
 #### Dynamic Label Values
 
-A powerful feature is the ability to set label values dynamic based on variables available on the method stack. Metric names cannot be dynamic. The way we specify dynamic label values is using the `${index}` syntax followed by the method argument index. The special value `$this` can be used for referencing `this.toString()` in non static methods (i.e. where `this.` is valid).
- 
-Note that we restrict the stack usage to the method arguments only. That is, we don't allow use of variables created within the method as that is a very fragile thing to do. The String representation as given by `String.valueOf()` of the parameter is used as the label value. That means for primitive types we perform boxing first and null objects will result in the String `"null"`. Argument indexes start at index `0`. 
+A powerful feature is the ability to set label values dynamic based on variables available on the method stack. Metric names cannot be dynamic. The way we specify dynamic label values is using the `${index}` syntax followed by the method argument index. The special value `$this` can be used to access the current instance reference in non static methods. We prevent usage of `$this` in constructors to prevent initialisation leakage.
+
+Note that we restrict the stack usage to the method arguments only. That is, we don't allow use of variables created within the method as that is a very fragile thing to do. The String representation as given by `String.valueOf()` of the parameter is used as the label value. That means for primitive types we perform boxing first and null objects will result in the String `"null"`. Argument indexes start at index `0` up to the number of `args.length - 1` (i.e. array index syntax). We manage any special logic that occurs with the actual location on the stack due to non static methods (`this` is index `0` on the stack) and static methods (no `this`). Therefore you can always assume index `0` is the first method argument. 
 
 ```java
 @Counted (name = "service_total", labels = { "client:$0" })
 public void callService(String client) 
 ```
 
-Each time this method is invoked it will use the value of the `client` parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep. As we use `PropertyUtils` from the `commons-beanutils` library to perform the nested property reading, the method must obey the JavaBeans spec. It should be relatively easy to add support for new BeanIntrospectors to support non JavaBean nested lookup.
+Each time this method is invoked it will use the value of the `client` parameter as the metric label value. We also support accessing nested property values. For example, `($1.httpMethod)` where `$1` is the first method parameter and is e.g. of type `HttpRequest`. This means you are essentially doing `httpRequest.getHttpMethod().toString();`. This nesting can be arbitrarily deep. We use `PropertyUtils` from the `commons-beanutils` library to perform the nested property reading. Typically this means you can only use JavaBeans conforming properties, however, we have added a `GenericBeanIntrospector` which allows for accessing properties in methods like `name()`  via e.g. `$1.name` etc. This gives better cross languages support.
 
 
 ### What we actually Transform

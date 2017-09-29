@@ -15,8 +15,7 @@ public class MetricAnnotationAttributeVisitor extends AnnotationVisitor {
 
     private final Configuration config;
     private final Configuration.Key metricKey;
-
-    private Metric.MetricBuilder metricBuilder;
+    private final Metric.MetricBuilder metricBuilder;
 
     public MetricAnnotationAttributeVisitor(AnnotationVisitor av, MetricType metricType, Configuration config, Configuration.Key metricKey) {
         super(ASM5, av);
@@ -76,8 +75,6 @@ public class MetricAnnotationAttributeVisitor extends AnnotationVisitor {
     public void visitEnd() {
         super.visitEnd();
 
-        Metric metric = metricBuilder.createMetric();
-
         List<Metric> metrics = config.getMetrics().get(metricKey);
 
         if (metrics == null) {
@@ -85,6 +82,6 @@ public class MetricAnnotationAttributeVisitor extends AnnotationVisitor {
             config.getMetrics().put(metricKey, metrics);
         }
 
-        metrics.add(metric);
+        metrics.add(metricBuilder.createMetric());
     }
 }
