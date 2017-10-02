@@ -1,5 +1,5 @@
-# Compatible & tested with Jersey 9.4
-# Should be compatible with 9.x range
+# Compatible & tested with Jersey 2.3
+# Should be compatible with 2.x range
 
 imports:
   - com/fleury/resources/HelloWorldResource
@@ -7,7 +7,7 @@ imports:
   - org/glassfish/jersey/server/ContainerResponse
   - org/glassfish/jersey/message/internal/OutboundJaxrsResponse
   - org/glassfish/jersey/internal/util/collection/Value
-  - org/glassfish/jersey/servlet/WebComponent
+  - org/glassfish/jersey/servlet/ServletContainer
   - javax/servlet/http/HttpServletRequest
   - javax/servlet/http/HttpServletResponse
   - java/util/Optional
@@ -19,7 +19,7 @@ imports:
 
 metrics:
 
-  WebComponent.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
+  ServletContainer.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
     - type: Timed
       name: resource_latency
       doc: Measuring http resource latencies

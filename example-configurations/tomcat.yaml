@@ -1,0 +1,74 @@
+# Example tomcat request instrumentation. We demo instrumenting for
+#
+# - Basic Servlets
+# - JSP
+# - Jersey REST Resources (the same as in jersey.yaml)
+
+imports:
+  - com/fleury/resources/HelloWorldResource
+  - org/glassfish/jersey/server/ContainerRequest
+  - org/glassfish/jersey/server/ContainerResponse
+  - org/glassfish/jersey/message/internal/OutboundJaxrsResponse
+  - org/glassfish/jersey/internal/util/collection/Value
+  - org/glassfish/jersey/servlet/ServletContainer
+  - org/apache/jasper/servlet/JspServlet
+  - javax/servlet/http/HttpServletRequest
+  - javax/servlet/http/HttpServletResponse
+  - javax/servlet/http/HttpServlet
+  - java/util/Optional
+  - java/lang/Object
+  - java/lang/String
+  - java/net/URI
+
+
+metrics:
+  # Basic Servlet
+  HttpServlet.service(LHttpServletRequest;LHttpServletResponse;)V:
+    - type: Timed
+      name: servlet_resource_latency
+      doc: Measuring http resource latencies
+      labels: ['path:$0.servletPath', 'method:$0.method']
+
+    - type: Gauged
+      name: servlet_in_flight_requests
+      mode: in_flight
+      doc: Measuring in flight requests
+      labels: ['path:$0.servletPath', 'method:$0.method']
+
+  # JSP Servlet
+  JspServlet.service(LHttpServletRequest;LHttpServletResponse;)V:
+    - type: Timed
+      name: jsp_resource_latency
+      doc: Measuring http resource latencies
+      labels: ['path:$0.servletPath', 'method:$0.method']
+
+    - type: Gauged
+      name: jsp_in_flight_requests
+      mode: in_flight
+      doc: Measuring in flight requests
+      labels: ['path:$0.servletPath', 'method:$0.method']
+
+  # Jersey Resources
+  ServletContainer.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
+    - type: Timed
+      name: jersey_resource_latency
+      doc: Measuring http resource latencies
+      labels: ['path:$1.path', 'method:$2.method']
+
+    - type: Gauged
+      name: jersey_in_flight_requests
+      mode: in_flight
+      doc: Measuring in flight requests
+      labels: ['path:$1.path', 'method:$2.method']
+
+  # Jersey Resources - tracks call count by response code (status)
+  ContainerResponse.<init>(LContainerRequest;LOutboundJaxrsResponse;)V:
+    - type: Counted
+      name: jersey_http_call_count
+      doc: Http methods call counts
+      labels: ['path:$0.requestUri.path', 'method:$0.method', 'status:$1.status']
+
+system:
+  jvm:
+    - gc
+    - memory

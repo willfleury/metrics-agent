@@ -5,6 +5,7 @@ import static java.util.logging.Level.FINE;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -44,6 +45,7 @@ public class Configuration {
     private final static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory()) {
         {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true);
             setVisibilityChecker(getSerializationConfig().getDefaultVisibilityChecker()
                     .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
             registerModule(new ConfigSimpleModule());

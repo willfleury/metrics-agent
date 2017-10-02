@@ -1,5 +1,5 @@
-# same as jersey.yaml
-# tested on Dropwizard 1.x
+# As Dropwizard resources are Jersey Resources running on Jetty, we simply need to instrument the same as Jersey.
+# Tested on Dropwizard 1.x but should work with any Jersey 2.x release
 
 imports:
   - com/fleury/resources/HelloWorldResource
@@ -7,7 +7,7 @@ imports:
   - org/glassfish/jersey/server/ContainerResponse
   - org/glassfish/jersey/message/internal/OutboundJaxrsResponse
   - org/glassfish/jersey/internal/util/collection/Value
-  - org/glassfish/jersey/servlet/WebComponent
+  - org/glassfish/jersey/servlet/ServletContainer
   - javax/servlet/http/HttpServletRequest
   - javax/servlet/http/HttpServletResponse
   - java/util/Optional
@@ -19,7 +19,7 @@ imports:
 
 metrics:
 
-  WebComponent.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
+  ServletContainer.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
     - type: Timed
       name: resource_latency
       doc: Measuring http resource latencies
