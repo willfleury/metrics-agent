@@ -6,14 +6,14 @@ imports:
   - org/glassfish/jersey/server/ContainerRequest
   - org/glassfish/jersey/server/ContainerResponse
   - org/glassfish/jersey/message/internal/OutboundJaxrsResponse
+  - org/glassfish/jersey/internal/util/collection/Value
+  - org/glassfish/jersey/servlet/WebComponent
+  - javax/servlet/http/HttpServletRequest
+  - javax/servlet/http/HttpServletResponse
   - java/util/Optional
   - java/lang/Object
   - java/lang/String
   - java/net/URI
-  - javax/servlet/http/HttpServletRequest
-  - javax/servlet/http/HttpServletResponse
-  - org/glassfish/jersey/internal/util/collection/Value
-  - org/glassfish/jersey/servlet/WebComponent
 
 
 
@@ -25,10 +25,17 @@ metrics:
       doc: Measuring http resource latencies
       labels: ['path:$1.path', 'method:$2.method']
 
+  WebComponent.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
+      - type: Gauged
+        name: in_flight_requests
+        mode: in_flight
+        doc: Measuring in flight requests
+        labels: ['path:$1.path', 'method:$2.method']
+
   ContainerResponse.<init>(LContainerRequest;LOutboundJaxrsResponse;)V:
     - type: Counted
-      name: http_status
-      doc: trying to count
+      name: http_call_count
+      doc: Http methods call counts
       labels: ['path:$0.requestUri.path', 'method:$0.method', 'status:$1.status']
 
 
