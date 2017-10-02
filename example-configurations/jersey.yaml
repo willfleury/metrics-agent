@@ -25,12 +25,11 @@ metrics:
       doc: Measuring http resource latencies
       labels: ['path:$1.path', 'method:$2.method']
 
-  WebComponent.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
-      - type: Gauged
-        name: in_flight_requests
-        mode: in_flight
-        doc: Measuring in flight requests
-        labels: ['path:$1.path', 'method:$2.method']
+    - type: Gauged
+      name: in_flight_requests
+      mode: in_flight
+      doc: Measuring in flight requests
+      labels: ['path:$1.path', 'method:$2.method']
 
   ContainerResponse.<init>(LContainerRequest;LOutboundJaxrsResponse;)V:
     - type: Counted
