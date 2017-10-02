@@ -75,13 +75,6 @@ public class MetricAnnotationAttributeVisitor extends AnnotationVisitor {
     public void visitEnd() {
         super.visitEnd();
 
-        List<Metric> metrics = config.getMetrics().get(metricKey);
-
-        if (metrics == null) {
-            metrics = new ArrayList<Metric>();
-            config.getMetrics().put(metricKey, metrics);
-        }
-
-        metrics.add(metricBuilder.createMetric());
+        config.addMetric(metricKey, metricBuilder.createMetric());
     }
 }

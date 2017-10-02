@@ -4,6 +4,7 @@
   - [Instrumentation Metadata](#instrumentation-metadata)
     - [Annotations](#annotations)
     - [Configuration](#configuration)
+      - [Class Imports](#class-imports)
     - [Metric Labels](#metric-labels)
       - [Dynamic Label Values](#dynamic-label-values)
     - [What we actually Transform](#what-we-actually-transform)
@@ -175,15 +176,36 @@ public class TestClass {
 We write the configuration as follows
 
 	metrics:
-	  com/fleury/test/TestClass.performSomeTask()V:
+	  com/fleury/test/TestClass.performSomeTask(Ljava/lang/String;)V:
 	    - type: Counted
 		  name: taskx_total
 		  doc: total invocations of task x
 
 
-Note the method signature is based on the method parameter types and return type. The parameter types are between the brackets `()` with the return type after. In this case we have no parameters and the return type is void which results in `()V`. [Here](http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html) is a good overview of Java method signature mappings.
+Note the method signature is based on the method parameter types and return type. The parameter types are between the brackets `()` with the return type after. In this case we have a single String argument and the return type is void which results in `(Ljava/lang/String;)V`. [Here](http://journals.ecs.soton.ac.uk/java/tutorial/native1.1/implementing/method.html) is a good overview of Java method signature mappings.
 
 In previous versions we allowed the package name to be specified using `.` instead of the internal `/` separator. While this is still supported for the metrics configuration section, it is not supported anywhere else and should be updated to only have the `/` package separator. 
+
+#### Class Imports
+
+To simplify the metrics definition section of the configuration, we allow an imports section. Here we can define the fully qualified class names for any classes we use or re-use in the definitions. This includes method type descriptors.
+
+
+    imports:
+      - com/fleury/test/TestClass
+      - java/lang/Object
+      - java/lang/String
+
+    metrics:
+      TestClass.performSomeTask(LString;)V:
+        - type: Counted
+          name: taskx_total
+          doc: total invocations of task x
+          
+       TestClass.performSomeOtherTask(LString;)LObject;:
+         - type: Counted
+           name: tasky_total
+           doc: total invocations of task y
 
 
 ### Metric Labels

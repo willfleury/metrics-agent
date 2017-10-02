@@ -1,14 +1,20 @@
 
+imports:
+  - com/fleury/sample/Engine
+  - java/lang/Object
+  - java/lang/String
+
 # key is class name, method name and method signature
 # {class}:{method}{signature}
 
 # labels are of the format
 # {name}:{value}
-# {value} can be a constant or it can be templated based on the method stack of 
+# {value} can be a constant or it can be templated based on the method stack of
 # variables/fields accessible via objects on the stack
 
 metrics:
-  com.fleury.sample.Engine.sampleMethod(I)J:
+  # the import above for com/fleury/sample/Engine ensures I can use className alone here
+  Engine.sampleMethod(I)J:
     - type: Counted
       name: count
       doc: trying to count
@@ -17,9 +23,13 @@ metrics:
       name: timer
       doc: trying to time
       labels: ['name1:value1', 'name2:value2']
-       
 
+  com/test/Special.sampleMethod(LString;)J:
+      - type: Counted
+        name: count
+        doc: trying to count
 
 system:
-    key1: value1
-    
+  jvm:
+    - gc
+    - memory
