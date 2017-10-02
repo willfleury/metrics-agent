@@ -22,7 +22,7 @@ public class Agent {
         initializeLogging(argParser.getLogConfigFilename());
 
         Configuration config = Configuration.createConfig(argParser.getConfigFilename());
-        MetricSystemProviderFactory.INSTANCE.init(config.getMetricSystemConfiguration());
+        MetricSystemProviderFactory.INSTANCE.init(config.getSystem());
 
         instrumentation.addTransformer(
                 new AnnotatedMetricClassTransformer(config),

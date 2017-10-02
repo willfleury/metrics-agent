@@ -1,6 +1,7 @@
 package com.fleury.metrics.agent.transformer.asm.injectors;
 
 import static com.fleury.metrics.agent.config.Configuration.dotToSlash;
+import static com.fleury.metrics.agent.config.Configuration.emptyConfiguration;
 
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.reporter.Reporter;
@@ -40,7 +41,7 @@ public abstract class BaseMetricTest {
     }
 
     protected <T> Class<T> execute(Class<T> clazz) throws Exception {
-        return execute(clazz, new Configuration());
+        return execute(clazz, emptyConfiguration());
     }
 
     protected <T> Class<T> execute(Class<T> clazz, Configuration config) throws Exception {

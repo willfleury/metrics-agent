@@ -1,0 +1,37 @@
+# same as jersey.yaml
+# tested on Dropwizard 1.x
+imports:
+  - com/fleury/resources/HelloWorldResource
+  - org/glassfish/jersey/server/ContainerRequest
+  - org/glassfish/jersey/server/ContainerResponse
+  - org/glassfish/jersey/message/internal/OutboundJaxrsResponse
+  - java/util/Optional
+  - java/lang/Object
+  - java/lang/String
+  - java/net/URI
+  - javax/servlet/http/HttpServletRequest
+  - javax/servlet/http/HttpServletResponse
+  - org/glassfish/jersey/internal/util/collection/Value
+  - org/glassfish/jersey/servlet/WebComponent
+
+
+
+metrics:
+
+  WebComponent.service(LURI;LURI;LHttpServletRequest;LHttpServletResponse;)LValue;:
+    - type: Timed
+      name: resource_latency
+      doc: Measuring http resource latencies
+      labels: ['path:$1.path', 'method:$2.method']
+
+  ContainerResponse.<init>(LContainerRequest;LOutboundJaxrsResponse;)V:
+    - type: Counted
+      name: http_status
+      doc: trying to count
+      labels: ['path:$0.requestUri.path', 'method:$0.method', 'status:$1.status']
+
+
+system:
+  jvm:
+    - gc
+    - memory

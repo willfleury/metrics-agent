@@ -1,5 +1,6 @@
 package com.fleury.metrics.agent.transformer.asm.injectors;
 
+import static com.fleury.metrics.agent.config.Configuration.emptyConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -8,9 +9,6 @@ import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.model.Metric;
 import com.fleury.metrics.agent.model.MetricType;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 
@@ -38,12 +36,11 @@ public class CounterInjectorTest extends BaseMetricTest {
                 .createMetric();
 
         Configuration.Key key = new Configuration.Key(
-                Type.getType(ConfigurationCountedConstructorClass.class).getInternalName(),
-                "<init>()V");
-        Map<Configuration.Key, List<Metric>> mConfig = new HashMap<Configuration.Key, List<Metric>>();
-        mConfig.put(key, Arrays.asList(meta));
+                Type.getInternalName(ConfigurationCountedConstructorClass.class),
+                "<init>", "()V");
 
-        Configuration config = new Configuration(mConfig);
+        Configuration config = emptyConfiguration();
+        config.addMetric(key, meta);
 
         Class<ConfigurationCountedConstructorClass> clazz = execute(ConfigurationCountedConstructorClass.class, config);
 

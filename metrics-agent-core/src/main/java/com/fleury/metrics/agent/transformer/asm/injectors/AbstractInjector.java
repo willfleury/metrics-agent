@@ -7,6 +7,7 @@ import static com.fleury.metrics.agent.model.LabelUtil.isTemplatedLabelValue;
 import static com.fleury.metrics.agent.model.LabelUtil.isThis;
 import static com.fleury.metrics.agent.transformer.asm.util.CollectionUtil.isNotEmpty;
 
+import com.fleury.metrics.agent.introspector.GenericClassIntrospector;
 import com.fleury.metrics.agent.model.LabelUtil;
 import com.fleury.metrics.agent.model.Metric;
 import com.fleury.metrics.agent.reporter.Reporter;
@@ -23,7 +24,11 @@ import org.objectweb.asm.commons.AdviceAdapter;
  */
 public abstract class AbstractInjector implements Injector, Opcodes {
 
-    public static final String METRIC_REPORTER_CLASSNAME = Type.getType(Reporter.class).getInternalName();
+    public static final String METRIC_REPORTER_CLASSNAME = Type.getInternalName(Reporter.class);
+
+    static {
+        PropertyUtils.addBeanIntrospector(new GenericClassIntrospector());
+    }
 
     protected final AdviceAdapter aa;
     protected final Type[] argTypes;
@@ -73,7 +78,7 @@ public abstract class AbstractInjector implements Injector, Opcodes {
         int labelVar = aa.newLocal(Type.getType(String[].class));
 
         aa.visitInsn(OpCodeUtil.getIConstOpcodeForInteger(labelValues.size()));
-        aa.visitTypeInsn(ANEWARRAY, Type.getType(String.class).getInternalName());
+        aa.visitTypeInsn(ANEWARRAY, Type.getInternalName(String.class));
 
         for (int i = 0; i < labelValues.size(); i++) {
             aa.visitInsn(DUP);

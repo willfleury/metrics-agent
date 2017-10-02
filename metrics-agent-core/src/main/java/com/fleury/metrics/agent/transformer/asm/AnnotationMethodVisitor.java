@@ -34,7 +34,7 @@ public class AnnotationMethodVisitor extends MethodVisitor {
         MetricType metricType = checkSignature(desc);
 
         if (metricType != null) {
-            Configuration.Key key = new Configuration.Key(className, methodName + methodDesc);
+            Configuration.Key key = new Configuration.Key(className, methodName, methodDesc);
 
             return new MetricAnnotationAttributeVisitor(super.visitAnnotation(desc, visible), metricType, config, key);
         }

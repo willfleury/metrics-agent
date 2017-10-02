@@ -3,6 +3,7 @@ package com.fleury.metrics.agent.config;
 import static java.util.logging.Level.FINE;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -17,11 +18,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
+import org.objectweb.asm.Type;
 
 /**
  *
@@ -46,16 +52,14 @@ public class Configuration {
 
     public static Configuration createConfig(String filename) {
         if (filename == null) {
-            return new Configuration();
+            return emptyConfiguration();
         }
 
+        LOGGER.log(FINE, "Found config file: {0}", filename);
+
         try {
-            LOGGER.log(FINE, "Found config file: {0}", filename);
-            Configuration configuration = createConfig(new FileInputStream(filename));
-            LOGGER.log(FINE, "Created config: {0}", configuration);
-            return configuration;
-        }
-        catch (FileNotFoundException e) {
+            return createConfig(new FileInputStream(filename));
+        } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -63,31 +67,81 @@ public class Configuration {
     public static Configuration createConfig(InputStream is) {
         try {
             return MAPPER.readValue(is, Configuration.class);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {}
         }
     }
 
-    @JsonProperty("metrics")
-    private Map<Key, List<Metric>> metrics = Collections.emptyMap();
-
-    @JsonProperty("system")
-    private Map<String, Object> metricSystemConfiguration = Collections.emptyMap();
-
-    @JsonProperty("whiteList")
-    private List<String> whiteList = Collections.emptyList();
-
-    @JsonProperty("blackList")
-    private List<String> blackList = Collections.emptyList();
-
-    public Configuration() {
-        this(new HashMap<Key, List<Metric>>());
+    public static Configuration emptyConfiguration() {
+        return new Configuration();
     }
 
-    public Configuration(Map<Key, List<Metric>> metrics) {
-        this.metrics = metrics;
+    private final Set<String> imports;
+    private final Map<Key, List<Metric>> metrics;
+    private final Map<String, Object> system;
+    private final List<String> whiteList;
+    private final List<String> blackList;
+
+    private Configuration() {
+        this(new HashMap<Key, List<Metric>>(),
+                Collections.<String>emptySet(),
+                Collections.<String, Object>emptyMap(),
+                Collections.<String>emptyList(),
+                Collections.<String>emptyList());
     }
+
+    @JsonCreator
+    public Configuration(
+            @JsonProperty("metrics") Map<Key, List<Metric>> metrics,
+            @JsonProperty("imports") Set<String> imports,
+            @JsonProperty("system") Map<String, Object> system,
+            @JsonProperty("whiteList") List<String> whiteList,
+            @JsonProperty("blackList") List<String> blackList) {
+
+        this.imports = imports == null ? Collections.<String>emptySet() : imports;
+
+        this.metrics = metrics == null ?
+                new HashMap<Key, List<Metric>>() :
+                processClassImports(metrics, this.imports); //ensure fqn expanded from imports
+
+        this.system = system == null ? Collections.<String, Object>emptyMap() : system;
+        this.whiteList = whiteList == null ? Collections.<String>emptyList() : whiteList;
+        this.blackList = blackList == null ? Collections.<String>emptyList() : blackList;
+    }
+
+    private static Map<Key, List<Metric>> processClassImports(Map<Key, List<Metric>> metrics, Set<String> imports) {
+        Map<String, String> expandedKeys = fqnToMap(imports);
+
+        Map<Key, List<Metric>> processed = new HashMap<Key, List<Metric>>();
+        for (Map.Entry<Key, List<Metric>> entry : metrics.entrySet()) {
+            Key key = entry.getKey();
+
+            String fqn = expandedKeys.get(key.getClassName());
+            if (fqn == null) {
+                fqn = key.getClassName();
+            }
+
+            String descriptor = key.descriptor;
+
+            Map<String, String> fqnMap = getMethodDescriptorFQNMap(descriptor);
+            for (String className : fqnMap.keySet()) {
+                if (expandedKeys.containsKey(className)) {
+                    descriptor = descriptor.replaceAll(className, expandedKeys.get(className));
+                }
+            }
+
+            key = new Key(fqn, key.getMethod(), descriptor);
+
+            processed.put(key, entry.getValue());
+        }
+
+        return processed;
+    }
+
 
     public boolean isMetric(String className) {
         for (Key key : metrics.keySet()) {
@@ -99,17 +153,37 @@ public class Configuration {
         return false;
     }
 
-    public List<Metric> findMetrics(String className, String method) {
-        Key key = new Key(className, method);
+    public List<Metric> findMetrics(String className) {
+        if (metrics.isEmpty()) return Collections.emptyList();
+
+        List<Metric> found = new ArrayList<Metric>();
+        for (Key key : metrics.keySet()) {
+            if (key.className.equals(className)) {
+                found.addAll(metrics.get(key));
+            }
+        }
+
+        return found;
+    }
+
+    public List<Metric> findMetrics(String className, String method, String descriptor) {
+        Key key = new Key(className, method, descriptor);
         return metrics.containsKey(key) ? metrics.get(key) : Collections.<Metric>emptyList();
     }
 
-    public Map<Key, List<Metric>> getMetrics() {
-        return metrics;
+    public void addMetric(Key key, Metric metric) {
+        List<Metric> keyMetrics = metrics.get(key);
+
+        if (keyMetrics == null) {
+            keyMetrics = new ArrayList<Metric>();
+            metrics.put(key, keyMetrics);
+        }
+
+        keyMetrics.add(metric);
     }
-    
-    public Map<String, Object> getMetricSystemConfiguration() {
-        return metricSystemConfiguration;
+
+    public Map<String, Object> getSystem() {
+        return system;
     }
 
     public List<String> getWhiteList() {
@@ -118,14 +192,6 @@ public class Configuration {
 
     public List<String> getBlackList() {
         return blackList;
-    }
-
-    public void setWhiteList(List<String> whiteList) {
-        this.whiteList = whiteList;
-    }
-
-    public void setBlackList(List<String> blackList) {
-        this.blackList = blackList;
     }
 
     public boolean isWhiteListed(String className) {
@@ -156,20 +222,48 @@ public class Configuration {
     public String toString() {
         return "Configuration{" +
                 "metrics=" + metrics +
-                ", metricSystemConfiguration=" + metricSystemConfiguration +
+                ", system=" + system +
                 ", whiteList=" + whiteList +
                 ", blackList=" + blackList +
                 '}';
+    }
+
+    public static Map<String, String> fqnToMap(Collection<String> classNames) {
+        Map<String, String> expandedKeys = new HashMap<String, String>();
+        for (String fqn : classNames) {
+            String className = fqn.substring(fqn.lastIndexOf("/") + 1, fqn.length());
+            expandedKeys.put(className, fqn);
+        }
+
+        return expandedKeys;
+    }
+
+    public static Map<String, String> getMethodDescriptorFQNMap(String descriptor) {
+        Type type = Type.getMethodType(descriptor);
+
+        Set<String> classes = new HashSet<String>();
+        classes.add(type.getReturnType().getClassName());
+
+        Type[] arguments = type.getArgumentTypes();
+        if (arguments != null) {
+            for (Type arg : arguments) {
+                classes.add(arg.getClassName());
+            }
+        }
+
+        return fqnToMap(classes);
     }
 
     public static class Key {
 
         private final String className;
         private final String method;
+        private final String descriptor;
 
-        public Key(String className, String method) {
+        public Key(String className, String method, String descriptor) {
             this.className = className;
             this.method = method;
+            this.descriptor = descriptor;
         }
 
         public String getClassName() {
@@ -180,11 +274,16 @@ public class Configuration {
             return method;
         }
 
+        public String getDescriptor() {
+            return descriptor;
+        }
+
         @Override
         public int hashCode() {
             int hash = 3;
             hash = 29 * hash + (this.className != null ? this.className.hashCode() : 0);
             hash = 29 * hash + (this.method != null ? this.method.hashCode() : 0);
+            hash = 29 * hash + (this.descriptor != null ? this.descriptor.hashCode() : 0);
             return hash;
         }
 
@@ -203,6 +302,9 @@ public class Configuration {
             if ((this.method == null) ? (other.method != null) : !this.method.equals(other.method)) {
                 return false;
             }
+            if ((this.descriptor == null) ? (other.descriptor != null) : !this.descriptor.equals(other.descriptor)) {
+                return false;
+            }
             return true;
         }
 
@@ -211,6 +313,7 @@ public class Configuration {
             return "Key{" +
                     "className='" + className + '\'' +
                     ", method='" + method + '\'' +
+                    ", desc='" + descriptor + '\'' +
                     '}';
         }
     }
@@ -220,9 +323,11 @@ public class Configuration {
         @Override
         public Object deserializeKey(final String key, final DeserializationContext ctxt) throws IOException {
             String className = dotToSlash(key.substring(0, key.lastIndexOf(".")));
-            String methodName = key.substring(key.lastIndexOf(".") + 1, key.length());
+            String methodName = key.substring(key.lastIndexOf(".") + 1, key.indexOf("("));
 
-            return new Key(className, methodName);
+            String desc = key.substring(key.indexOf("("), key.length());
+
+            return new Key(className, methodName, desc);
         }
     }
 

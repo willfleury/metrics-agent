@@ -19,7 +19,7 @@ public class MetricClassVisitor extends RestrictedClassVisitor {
 
     @Override
     public MethodVisitor visitAllowedMethod(MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
-        List<Metric> metadata = config.findMetrics(className, name + desc);
+        List<Metric> metadata = config.findMetrics(className, name, desc);
 
         mv = new MetricAdapter(mv, className, access, name, desc, metadata);
         return new JSRInlinerAdapter(mv, access, name, desc, signature, exceptions);
