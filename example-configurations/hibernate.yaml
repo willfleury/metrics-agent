@@ -1,0 +1,151 @@
+# Example Hibernate Statistics Configuration. Tested with Hibernate 5.x
+#
+# Instrument the callback methods in the StatisticsImplementor implementation (ConcurrentStatisticsImpl).
+# We can get access to all of hibernates statistics in a simple and detailed manner.
+#
+# In this configuration we instrument the following statistics Methods
+#
+# Session Metrics
+# - openSession
+# - closeSession
+# - flush
+# - connect
+#
+# Statement Metrics
+# - prepareStatement
+# - closeStatement
+# - endTransaction
+#
+# Entity Metrics
+# - loadEntity
+# - fetchEntity
+# - updateEntity
+# - insertEntity
+# - deleteEntity
+#
+# Cache Metrics
+# - queryCachePut
+# - queryCacheHit
+# - queryCacheMiss
+#
+# - secondLevelCachePut
+# - secondLevelCacheHit
+# - secondLevelCacheMiss
+
+
+
+imports:
+  - org/hibernate/stat/internal/ConcurrentStatisticsImpl
+  - java/lang/String
+
+
+metrics:
+  # Session Metrics
+  ConcurrentStatisticsImpl.openSession()V:
+    - type: Counted
+      name: hibernate_session_opened_total
+      doc: Global number of sessions opened (getSessionOpenCount)
+
+  ConcurrentStatisticsImpl.closeSession()V:
+    - type: Counted
+      name: hibernate_session_closed_total
+      doc: Global number of sessions opened (getSessionClosedCount)
+
+  ConcurrentStatisticsImpl.flush()V:
+    - type: Counted
+      name: hibernate_flushed_total
+      doc: The global number of flushes executed by sessions (getFlushCount)
+
+  ConcurrentStatisticsImpl.connect()V:
+    - type: Counted
+      name: hibernate_connect_total
+      doc: The global number of connections requested by the sessions (getConnectCount)
+
+
+  # Statement Metrics
+  ConcurrentStatisticsImpl.prepareStatement()V:
+    - type: Counted
+      name: hibernate_statement_prepared_total
+      doc: The number of prepared statements that were acquired (getPrepareStatementCount)
+
+  ConcurrentStatisticsImpl.closeStatement()V:
+    - type: Counted
+      name: hibernate_statement_closed_total
+      doc: The number of prepared statements that were released (getCloseStatementCount)
+
+  ConcurrentStatisticsImpl.endTransaction()V:
+    - type: Counted
+      name: hibernate_transaction_total
+      doc: The number of transactions we know to have completed (getTransactionCount)
+
+
+
+  # Entity Metrics
+  ConcurrentStatisticsImpl.loadEntity(LString;)V:
+    - type: Counted
+      name: hibernate_entity_load_total
+      doc: Global number of entity loads (loadEntity)
+      labels: ['entity:$0']
+
+  ConcurrentStatisticsImpl.fetchEntity(LString;)V:
+    - type: Counted
+      name: hibernate_entity_fetch_total
+      doc: Global number of entity fetches (fetchEntity)
+      labels: ['entity:$0']
+
+  ConcurrentStatisticsImpl.updateEntity(LString;)V:
+    - type: Counted
+      name: hibernate_entity_update_total
+      doc: Global number of entity updates (updateEntity)
+      labels: ['entity:$0']
+
+  ConcurrentStatisticsImpl.insertEntity(LString;)V:
+    - type: Counted
+      name: hibernate_entity_insert_total
+      doc: Global number of entity inserts (insertEntity)
+      labels: ['entity:$0']
+
+  ConcurrentStatisticsImpl.deleteEntity(LString;)V:
+    - type: Counted
+      name: hibernate_entity_delete_total
+      doc: Global number of entity deletes (deleteEntity)
+      labels: ['entity:$0']
+
+
+  # Query Cache Metrics
+  ConcurrentStatisticsImpl.queryCachePut(LString;LString;)V:
+    - type: Counted
+      name: hibernate_query_cache_put_total
+      doc: The global number of cacheable queries put in cache (getQueryCachePutCount)
+
+  ConcurrentStatisticsImpl.queryCacheHit(LString;LString;)V:
+    - type: Counted
+      name: hibernate_query_cache_hit_total
+      doc: The global number of cached queries successfully retrieved from cache (getQueryCacheHitCount)
+
+  ConcurrentStatisticsImpl.queryCacheMiss(LString;LString;)V:
+    - type: Counted
+      name: hibernate_query_cache_miss_total
+      doc: The global number of cached queries not found in cache (getQueryCacheMissCount)
+
+  # Query Cache Metrics (second level)
+  ConcurrentStatisticsImpl.secondLevelCachePut(LString;)V:
+    - type: Counted
+      name: hibernate_second_level_cache_put_total
+      doc: Global number of cacheable entities/collections put in the cache (getSecondLevelCachePutCount)
+
+  ConcurrentStatisticsImpl.secondLevelCacheHit(LString;)V:
+    - type: Counted
+      name: hibernate_second_level_cache_hit_total
+      doc: Global number of cacheable entities/collections successfully retrieved from the cache (getSecondLevelCacheHitCount)
+
+  ConcurrentStatisticsImpl.secondLevelCacheMiss(LString;)V:
+    - type: Counted
+      name: hibernate_second_level_cache_miss_total
+      doc: Global number of cacheable entities/collections not found in the cache and loaded from the database (getSecondLevelCacheMissCount)
+
+system:
+  jvm:
+    - gc
+    - memory
+    - threads

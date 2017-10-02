@@ -72,3 +72,4 @@ system:
   jvm:
     - gc
     - memory
+    - threads

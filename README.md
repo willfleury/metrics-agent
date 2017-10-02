@@ -390,3 +390,13 @@ Note if you want to debug the metrics agent you should put the debugger agent fi
 
 	-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=<port> -javaagent:metrics-agent.jar myapp.jar
 
+
+# Examples 
+
+We provide some example configurations for popular frameworks. They serve as examples for how to instrument others and can be combined as desired (e.g. you can have both dropwizard request metrics and hibernate in the same configuration). As you will see, it is very simple and light weight to add new frameworks. In the case where different major versions of frameworks required different classes and methods to be instrumented, this simply becomes the addition of a new configuration file for that version. 
+
+ - [Jersey](example-configurations/jersey.yaml)
+ - [Dropwizard (via Jersey)](example-configurations/dropwizard.yaml)
+ - [Tomcat Servlet, JSP, Jersey](example-configurations/tomcat.yaml)
+ - [Hibernate](example-configurations/hibernate.yaml)
+
