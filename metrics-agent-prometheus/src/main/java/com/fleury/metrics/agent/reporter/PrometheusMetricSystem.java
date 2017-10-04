@@ -41,6 +41,8 @@ public class PrometheusMetricSystem implements MetricSystem {
         new StandardExports().register();
 
         addJVMMetrics(configuration);
+
+        startDefaultEndpoint();
     }
 
     @Override
@@ -125,20 +127,27 @@ public class PrometheusMetricSystem implements MetricSystem {
 
     @Override
     public void startDefaultEndpoint() {
-        int port = DEFAULT_HTTP_PORT;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int port = DEFAULT_HTTP_PORT;
 
-        if (configuration.containsKey("httpPort")) {
-            port = Integer.parseInt((String)configuration.get("httpPort"));
-        }
+                if (configuration.containsKey("httpPort")) {
+                    port = Integer.parseInt((String)configuration.get("httpPort"));
+                }
 
-        try {
-            LOGGER.fine("Starting Prometheus HttpServer on port " + port);
+                try {
+                    LOGGER.fine("Starting Prometheus HttpServer on port " + port);
 
-            new HTTPServer(port);
+                    new HTTPServer(port);
 
-        } catch (Exception e) { //widen scope in case of ClassNotFoundException on non oracle/sun JVM
-            LOGGER.log(WARNING, "Unable to register Prometheus HttpServer on port " + port, e);
-        }
+                } catch (Exception e) { //widen scope in case of ClassNotFoundException on non oracle/sun JVM
+                    LOGGER.log(WARNING, "Unable to register Prometheus HttpServer on port " + port, e);
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void addJVMMetrics(Map<String, Object> configuration) {

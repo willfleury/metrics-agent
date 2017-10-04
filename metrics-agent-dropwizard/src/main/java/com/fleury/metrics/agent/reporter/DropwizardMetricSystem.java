@@ -28,6 +28,8 @@ public class DropwizardMetricSystem implements MetricSystem {
     public DropwizardMetricSystem(Map<String, Object> configuration) {
         this.configuration = configuration;
         addJVMMetrics(configuration);
+
+        startDefaultEndpoint();
     }
 
     @Override

@@ -6,9 +6,8 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 import com.fleury.metrics.agent.config.Configuration;
-import com.fleury.metrics.agent.transformer.asm.ASMClassWriter;
-import com.fleury.metrics.agent.transformer.asm.AnnotationClassVisitor;
-import com.fleury.metrics.agent.transformer.asm.MetricClassVisitor;
+import com.fleury.metrics.agent.transformer.visitors.AnnotationClassVisitor;
+import com.fleury.metrics.agent.transformer.visitors.MetricClassVisitor;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;

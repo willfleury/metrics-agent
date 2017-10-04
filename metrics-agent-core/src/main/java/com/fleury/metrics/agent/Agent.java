@@ -5,7 +5,6 @@ import static com.fleury.metrics.agent.config.LoggerUtil.initializeLogging;
 import com.fleury.metrics.agent.config.ArgParser;
 import com.fleury.metrics.agent.config.Configuration;
 import com.fleury.metrics.agent.reporter.MetricSystemProviderFactory;
-import com.fleury.metrics.agent.reporter.Reporter;
 import com.fleury.metrics.agent.transformer.AnnotatedMetricClassTransformer;
 import java.lang.instrument.Instrumentation;
 
@@ -27,17 +26,5 @@ public class Agent {
         instrumentation.addTransformer(
                 new AnnotatedMetricClassTransformer(config),
                 instrumentation.isRetransformClassesSupported());
-
-        startDefaultMetricEndpoint();
-    }
-
-    private static void startDefaultMetricEndpoint() {
-        //start in background thread so we don't delay application startup
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Reporter.startDefaultMetricEndpoint();
-            }
-        }).start();
     }
 }
